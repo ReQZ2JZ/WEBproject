@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
-from .models import Game, Build
+from django.utils import timezone
+from .models import Game, Build, AdminInvite
 from .forms import AdminRegistrationForm
 import random
 
@@ -124,3 +125,28 @@ def register_admin(request):
         form = AdminRegistrationForm()
     
     return render(request, 'game_builds/register_admin.html', {'form': form})
+
+def activate_admin_invite(request, code):
+    if not request.user.is_authenticated:
+        return redirect('social:begin', 'github')
+    
+    try:
+        invite = AdminInvite.objects.get(code=code, is_used=False)
+        if invite.github_username == request.user.social_auth.get(provider='github').uid:
+            invite.is_used = True
+            invite.used_at = timezone.now()
+            invite.save()
+            
+            user = request.user
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            
+            messages.success(request, 'Вы успешно активировали админ права!')
+            return redirect('admin:index')
+        else:
+            messages.error(request, 'Это приглашение предназначено для другого пользователя GitHub.')
+    except AdminInvite.DoesNotExist:
+        messages.error(request, 'Неверный или уже использованный код приглашения.')
+    
+    return redirect('game_builds:game_list')
