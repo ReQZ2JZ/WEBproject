@@ -1,0 +1,30 @@
+{% extends 'game_builds/base.html' %}
+
+{% block title %}Список игр - Random Builds{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Доступные игры</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for game in games %}
+    <div class="col">
+        <div class="card h-100 game-card">
+            {% if game.image %}
+            <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ game.name }}</h5>
+                <p class="card-text">{{ game.description }}</p>
+                <a href="{% url 'game_builds:game_detail' game.slug %}" class="btn btn-primary">Генерировать билд</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            Пока нет доступных игр. Скоро добавим!
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 
