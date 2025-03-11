@@ -132,7 +132,10 @@ def activate_admin_invite(request, code):
     
     try:
         invite = AdminInvite.objects.get(code=code, is_used=False)
-        if invite.github_username == request.user.social_auth.get(provider='github').uid:
+        github_account = request.user.social_auth.get(provider='github')
+        github_username = github_account.extra_data.get('login')  # Получаем username из GitHub
+        
+        if invite.github_username == github_username:
             invite.is_used = True
             invite.used_at = timezone.now()
             invite.save()
@@ -148,5 +151,7 @@ def activate_admin_invite(request, code):
             messages.error(request, 'Это приглашение предназначено для другого пользователя GitHub.')
     except AdminInvite.DoesNotExist:
         messages.error(request, 'Неверный или уже использованный код приглашения.')
+    except Exception as e:
+        messages.error(request, f'Произошла ошибка при активации: {str(e)}')
     
     return redirect('game_builds:game_list')
