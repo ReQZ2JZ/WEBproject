@@ -1,0 +1,30 @@
+{
+    "include": [
+        "game_builds",
+        "random_builds"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/migrations",
+        "**/.git",
+        "**/.venv",
+        "**/venv"
+    ],
+    "ignore": [
+        "**/migrations",
+        "**/*.pyc"
+    ],
+    "reportMissingImports": false,
+    "reportMissingTypeStubs": false,
+    "pythonVersion": "3.12",
+    "typeCheckingMode": "off",
+    "useLibraryCodeForTypes": true,
+    "venvPath": ".",
+    "venv": ".venv",
+    "reportGeneralTypeIssues": false,
+    "reportOptionalMemberAccess": false,
+    "reportOptionalSubscript": false,
+    "reportPrivateUsage": false,
+    "reportUnboundVariable": false
+} 
