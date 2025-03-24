@@ -1,0 +1,78 @@
+{% extends 'game_builds/base.html' %}
+
+{% block title %}{{ game.name }} - Random Builds{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        {% if game.image %}
+        <img src="{{ game.image.url }}" class="img-fluid rounded" alt="{{ game.name }}">
+        {% endif %}
+    </div>
+    <div class="col-md-8">
+        <h1>{{ game.name }}</h1>
+        <p class="lead">{{ game.description }}</p>
+        <button id="generateBuild" class="btn btn-primary btn-lg">Сгенерировать случайный билд</button>
+        <div id="buildResult" class="build-result" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('generateBuild').addEventListener('click', function() {
+    fetch('{% url "game_builds:generate_build" game.slug %}')
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('buildResult');
+            let html = '<h3>Ваш случайный билд:</h3>';
+            
+            if (data.hero) {  // Для Dota 2
+                html += `<p><strong>Герой:</strong> ${data.hero}</p>`;
+                html += '<p><strong>Основные предметы:</strong></p>';
+                html += '<ul>';
+                data.core_items.forEach(item => {
+                    html += `<li>${item}</li>`;
+                });
+                html += '</ul>';
+            } else if (data.perks) {  // Для Dead by Daylight
+                html += '<p><strong>Перки:</strong></p>';
+                html += '<ul>';
+                data.perks.forEach(perk => {
+                    html += `<li>${perk}</li>`;
+                });
+                html += '</ul>';
+                html += `<p><strong>Предмет:</strong> ${data.item}</p>`;
+            } else if (data.тип_танка) {  // Для World of Tanks
+                html += `<p><strong>Нация:</strong> ${data.нация}</p>`;
+                html += `<p><strong>Тип танка:</strong> ${data.тип_танка}</p>`;
+                html += `<p><strong>Танк:</strong> ${data.танк}</p>`;
+                html += `<p><strong>Уровень:</strong> ${data.уровень}</p>`;
+                
+                html += '<p><strong>Оборудование:</strong></p>';
+                html += '<ul>';
+                data.оборудование.forEach(item => {
+                    html += `<li>${item}</li>`;
+                });
+                html += '</ul>';
+                
+                html += '<p><strong>Расходники:</strong></p>';
+                html += '<ul>';
+                data.расходники.forEach(item => {
+                    html += `<li>${item}</li>`;
+                });
+                html += '</ul>';
+            }
+            
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const resultDiv = document.getElementById('buildResult');
+            resultDiv.innerHTML = '<div class="alert alert-danger">Произошла ошибка при генерации билда</div>';
+            resultDiv.style.display = 'block';
+        });
+});
+</script>
+{% endblock %} 
