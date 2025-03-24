@@ -21,11 +21,103 @@ def generate_random_build(request, slug):
     game = get_object_or_404(Game, slug=slug)
     
     if game.name.lower() == "dota 2":
-        heroes = ["Anti-Mage", "Crystal Maiden", "Lina", "Shadow Fiend", "Pudge"]
-        items = ["Black King Bar", "Desolator", "Blink Dagger", "Aghanim's Scepter"]
+        heroes = [
+            # Сила
+            "Abaddon", "Alchemist", "Axe", "Beastmaster", "Brewmaster", "Bristleback", "Broodmother", "Centaur Warrunner", "Chaos Knight",
+            "Clockwerk", "Dawnbreaker", "Doom", "Dragon Knight", "Earth Spirit", "Earthshaker", "Elder Titan",
+            "Huskar", "Io", "Kunkka", "Legion Commander", "Lifestealer", "Lycan", "Magnus", "Marci",
+            "Mars", "Night Stalker", "Omniknight", "Phoenix", "Primal Beast", "Pudge", "Sand King",
+            "Slardar", "Snapfire", "Spirit Breaker", "Sven", "Tidehunter", "Timbersaw", "Tiny",
+            "Treant Protector", "Tusk", "Underlord", "Undying", "Wraith King",
+            
+            # Ловкость
+            "Anti-Mage", "Arc Warden", "Bloodseeker", "Bounty Hunter", "Clinkz", "Crystal Maiden",
+            "Drow Ranger", "Ember Spirit", "Faceless Void", "Gyrocopter", "Hoodwink", "Juggernaut",
+            "Lone Druid", "Luna", "Medusa", "Meepo", "Mirana", "Monkey King", "Morphling", "Naga Siren",
+            "Nyx Assassin", "Pangolier", "Phantom Assassin", "Phantom Lancer", "Razor", "Riki",
+            "Shadow Fiend", "Slark", "Sniper", "Spectre", "Templar Assassin", "Terrorblade",
+            "Troll Warlord", "Ursa", "Vengeful Spirit", "Venomancer", "Viper", "Weaver",
+            
+            # Интеллект
+            "Ancient Apparition", "Bane", "Batrider", "Crystal Maiden", "Dark Seer", "Dark Willow", "Dazzle", "Death Prophet",
+            "Disruptor", "Enchantress", "Enigma", "Grimstroke", "Invoker", "Jakiro", "Keeper of the Light",
+            "Leshrac", "Lich", "Lina", "Lion", "Nature's Prophet", "Necrophos", "Oracle", "Outworld Destroyer",
+            "Puck", "Queen of Pain", "Rubick", "Shadow Demon", "Shadow Shaman", "Silencer", "Skywrath Mage",
+            "Storm Spirit", "Techies", "Tinker", "Visage", "Void Spirit", "Warlock", "Witch Doctor",
+            "Zeus"
+        ]
+        
+        items = {
+            "Starting Items": [
+                "Tango", "Healing Salve", "Clarity", "Faerie Fire", "Iron Branch", "Circlet",
+                "Gauntlets of Strength", "Slippers of Agility", "Mantle of Intelligence", "Blight Stone",
+                "Orb of Venom", "Quelling Blade", "Stout Shield", "Ring of Protection", "Magic Stick"
+            ],
+            "Early Game": [
+                "Magic Wand", "Bracer", "Wraith Band", "Null Talisman", "Phase Boots", "Power Treads",
+                "Arcane Boots", "Guardian Greaves", "Soul Ring", "Urn of Shadows", "Medallion of Courage",
+                "Ring of Basilius", "Headdress", "Buckler", "Vladmir's Offering"
+            ],
+            "Mid Game": [
+                "Drum of Endurance", "Veil of Discord", "Eul's Scepter of Divinity", "Force Staff",
+                "Blink Dagger", "Aether Lens", "Vanguard", "Hood of Defiance", "Pipe of Insight",
+                "Glimmer Cape", "Ghost Scepter", "Rod of Atos", "Mekansm", "Guardian Greaves",
+                "Crimson Guard", "Solar Crest", "Aeon Disk", "Lotus Orb", "Diffusal Blade",
+                "Manta Style", "Sange", "Yasha", "Kaya", "Echo Sabre", "Mask of Madness",
+                "Crystalys", "Armlet of Mordiggian", "Shadow Blade", "Dragon Lance",
+                "Hurricane Pike", "Aghanim's Scepter", "Aghanim's Shard"
+            ],
+            "Late Game": [
+                "Abyssal Blade", "Assault Cuirass", "Battle Fury", "Black King Bar", "Bloodthorn",
+                "Butterfly", "Daedalus", "Desolator", "Divine Rapier", "Eye of Skadi", "Heart of Tarrasque",
+                "Linken's Sphere", "Manta Style", "Monkey King Bar", "Nullifier", "Octarine Core",
+                "Radiance", "Refresher Orb", "Satanic", "Scythe of Vyse", "Shiva's Guard",
+                "Skull Basher", "Sphere", "Travel Boots", "Vladmir's Offering"
+            ]
+        }
+        
+        # Выбираем случайного героя
+        hero = random.choice(heroes)
+        
+        # Выбираем предметы для разных стадий игры
+        starting_items = random.sample(items["Starting Items"], 3)
+        early_items = random.sample(items["Early Game"], 2)
+        mid_items = random.sample(items["Mid Game"], 2)
+        late_items = random.sample(items["Late Game"], 2)
+        
+        # Формируем ответ с изображениями
         build = {
-            "hero": random.choice(heroes),
-            "core_items": random.sample(items, 3)
+            "hero": hero,
+            "hero_image": f"/static/images/heroes/{hero.lower().replace(' ', '_')}.jpg",
+            "hero_image_png": f"/static/images/heroes/{hero.lower().replace(' ', '_')}.png",
+            "starting_items": [
+                {
+                    "name": item,
+                    "image_jpg": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.jpg",
+                    "image_png": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.png"
+                } for item in starting_items
+            ],
+            "early_game": [
+                {
+                    "name": item,
+                    "image_jpg": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.jpg",
+                    "image_png": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.png"
+                } for item in early_items
+            ],
+            "mid_game": [
+                {
+                    "name": item,
+                    "image_jpg": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.jpg",
+                    "image_png": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.png"
+                } for item in mid_items
+            ],
+            "late_game": [
+                {
+                    "name": item,
+                    "image_jpg": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.jpg",
+                    "image_png": f"/static/images/items/{item.lower().replace(' ', '_').replace('\'', '')}.png"
+                } for item in late_items
+            ]
         }
     elif game.name.lower() == "dead by daylight":
         perks = ["Borrowed Time", "Dead Hard", "Iron Will", "Sprint Burst"]
