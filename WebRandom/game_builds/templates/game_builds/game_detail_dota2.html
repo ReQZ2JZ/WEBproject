@@ -1,0 +1,94 @@
+{% extends 'game_builds/base.html' %}
+
+{% block title %}{{ game.name }} - Random Build (Dota 2){% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center text-uppercase text-primary">{{ game.name }}</h1>
+    <div class="text-center mb-4">
+        <button id="generateBtn" class="btn btn-lg btn-primary shadow">Generate Random Build</button>
+    </div>
+    <div id="buildResult" style="display: none;">
+        <!-- Здесь будет вывод результата билда -->
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h3>Hero</h3>
+            </div>
+            <div class="card-body text-center">
+                <img id="heroImage" src="" alt="Hero" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+                <h4 id="heroName" class="text-primary fw-bold"></h4>
+            </div>
+        </div>
+        <!-- Секции для предметов -->
+        <ul id="startingItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+        <ul id="earlyItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+        <ul id="midItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+        <ul id="lateItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateBtn');
+    if (!generateBtn) {
+        console.error("Кнопка 'Generate Random Build' не найдена");
+        return;
+    }
+    
+    generateBtn.addEventListener('click', function () {
+        let parts = window.location.pathname.split('/');
+        let slug = parts[2]; 
+        fetch(`/game/${slug}/generate/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok. Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Сгенерированный билд:", data);
+                document.getElementById('buildResult').style.display = 'block';
+                
+                // Обновляем героя
+                const heroImage = document.getElementById('heroImage');
+                const heroName = document.getElementById('heroName');
+                if (heroImage && heroName) {
+                    heroImage.src = data.hero_image_png || data.hero_image || "/static/images/heroes/default.png";
+                    heroName.textContent = data.hero;
+                }
+                
+                // Функция для обновления списка предметов
+                function updateItems(items, containerId) {
+                    const container = document.getElementById(containerId);
+                    container.innerHTML = '';
+                    items.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'item-card me-2 text-center';
+                        li.innerHTML = `
+                            <div class="card" style="width: 80px;">
+                                <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="max-height: 50px;">
+                                <div class="card-body p-1">
+                                    <small class="card-text">${item.name}</small>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(li);
+                    });
+                }
+                
+                // Обновляем разделы для каждого набора предметов
+                updateItems(data.starting_items, 'startingItems');
+                updateItems(data.early_game, 'earlyItems');
+                updateItems(data.mid_game, 'midItems');
+                updateItems(data.late_game, 'lateItems');
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("Ошибка при генерации билда. Проверьте консоль для деталей.");
+            });
+    });
+});
+</script>
+{% endblock %}

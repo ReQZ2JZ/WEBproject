@@ -98,65 +98,44 @@
 </style>
 
 <script>
-    document.getElementById('generateBtn').addEventListener('click', function () {
-        const slug = window.location.pathname.split('/')[2]; // Извлекаем slug из URL
-        fetch(`/game/${slug}/generate/`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('buildResult').style.display = 'block';
-
-                // Обновляем героя
-                const heroImage = document.getElementById('heroImage');
-                const heroName = document.getElementById('heroName');
-                heroImage.src = data.hero_image_png || data.hero_image;
-                heroName.textContent = data.hero;
-
-                // Обновляем Starting Items
-                const startingItems = document.getElementById('startingItems');
-                startingItems.innerHTML = ''; // Очищаем предыдущие результаты
-                data.starting_items.forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = 'item-card me-2';
-                    li.innerHTML = `
-                        <div class="card text-center shadow-sm" style="width: 80px;">
-                            <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="max-height: 50px;">
-                            <div class="card-body p-1">
-                                <small class="card-title">${item.name}</small>
-                            </div>
-                        </div>
-                    `;
-                    startingItems.appendChild(li);
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateBtn = document.getElementById('generateBtn');
+        if (!generateBtn) {
+            console.error("Кнопка 'Generate Random Build' не найдена");
+            return;
+        }
+        
+        generateBtn.addEventListener('click', function () {
+            // Извлекаем slug из URL (предполагается, что URL имеет вид /game/<slug>/...)
+            let parts = window.location.pathname.split('/');
+            let slug = parts[2]; 
+            fetch(`/game/${slug}/generate/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok. Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Выводим данные в консоль для проверки
+                    console.log("Сгенерированный билд:", data);
+                    // Здесь можно обновлять DOM: например, показать элемент с билдом
+                    document.getElementById('buildResult').style.display = 'block';
+                    // Обновите разделы страницы в зависимости от структуры данных
+                    // Пример для героя:
+                    const heroImage = document.getElementById('heroImage');
+                    const heroName = document.getElementById('heroName');
+                    if(heroImage && heroName) {
+                        heroImage.src = data.hero_image_png || data.hero_image;
+                        heroName.textContent = data.hero;
+                    }
+                    // Аналогично обновите элементы для начала, early_game, mid_game и late_game
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert("Ошибка при генерации билда. Проверьте консоль для деталей.");
                 });
-
-                // Аналогично обновляем Early, Mid и Late Game Items
-                const updateItems = (items, containerId) => {
-                    const container = document.getElementById(containerId);
-                    container.innerHTML = '';
-                    items.forEach(item => {
-                        const li = document.createElement('li');
-                        li.className = 'item-card me-2';
-                        li.innerHTML = `
-                            <div class="card text-center shadow-sm" style="width: 80px;">
-                                <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="max-height: 50px;">
-                                <div class="card-body p-1">
-                                    <small class="card-title">${item.name}</small>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(li);
-                    });
-                };
-
-                updateItems(data.early_game, 'earlyItems');
-                updateItems(data.mid_game, 'midItems');
-                updateItems(data.late_game, 'lateItems');
-            })
-            .catch(error => console.error('Error:', error));
+        });
     });
 </script>
 {% endblock %}
