@@ -4,190 +4,159 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">{{ game.name }}</h1>
+    <h1 class="mb-4 text-center text-uppercase text-primary">{{ game.name }}</h1>
     
-    <button id="generateBtn" class="btn btn-primary mb-4">Generate Random Build</button>
+    <div class="text-center mb-4">
+        <button id="generateBtn" class="btn btn-lg btn-primary shadow">Generate Random Build</button>
+    </div>
 
     <div id="buildResult" style="display: none;">
-        {% if game.name == "Dota 2" %}
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Hero</h5>
-                            <img id="heroImage" src="" alt="Hero" class="img-fluid mb-3">
-                            <h4 id="heroName" class="text-center"></h4>
-                        </div>
+        <!-- Hero Section -->
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h3>Hero</h3>
+            </div>
+            <div class="card-body text-center">
+                <img id="heroImage" src="" alt="Hero" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+                <h4 id="heroName" class="text-primary fw-bold"></h4>
+            </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-secondary text-white text-center">
+                        <h4>Starting Items</h4>
                     </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Starting Items</h5>
-                            <ul id="startingItems" class="list-group"></ul>
-                        </div>
-                    </div>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Early Game Items</h5>
-                            <ul id="earlyItems" class="list-group"></ul>
-                        </div>
-                    </div>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Mid Game Items</h5>
-                            <ul id="midItems" class="list-group"></ul>
-                        </div>
-                    </div>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Late Game Items</h5>
-                            <ul id="lateItems" class="list-group"></ul>
-                        </div>
+                    <div class="card-body">
+                        <ul id="startingItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
                     </div>
                 </div>
             </div>
-        {% endif %}
+            <div class="col-md-6">
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-secondary text-white text-center">
+                        <h4>Early Game Items</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul id="earlyItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-secondary text-white text-center">
+                        <h4>Mid Game Items</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul id="midItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4 shadow">
+                    <div class="card-header bg-secondary text-white text-center">
+                        <h4>Late Game Items</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul id="lateItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<script>
-    const gameSlug = '{{ game.slug }}';
-    const ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    const ws_path = `${ws_scheme}://${window.location.host}/ws/game/${gameSlug}/`;
-    const socket = new WebSocket(ws_path);
-
-    socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        updateBuildDisplay(data);
-    };
-
-    socket.onclose = function(e) {
-        console.error('Game socket closed unexpectedly');
-    };
-
-    document.getElementById('generateBtn').addEventListener('click', function() {
-        socket.send(JSON.stringify({
-            'message': 'generate_build'
-        }));
-        document.getElementById('buildResult').style.display = 'block';
-    });
-
-    function updateBuildDisplay(data) {
-        if (data.hero) {
-            const heroImage = document.getElementById('heroImage');
-            const heroName = document.getElementById('heroName');
-            
-            // Пробуем загрузить PNG
-            heroImage.src = `/static/images/heroes/${data.hero.toLowerCase().replace(' ', '_')}.png`;
-            heroImage.onerror = function() {
-                console.log('PNG failed, trying JPG...');
-                this.src = `/static/images/heroes/${data.hero.toLowerCase().replace(' ', '_')}.jpg`;
-                this.onerror = null; // Предотвращаем бесконечный цикл
-            };
-            
-            heroName.textContent = data.hero;
-        }
-
-        // Обновляем предметы
-        updateItemsList('startingItems', data.starting_items);
-        updateItemsList('earlyItems', data.early_items);
-        updateItemsList('midItems', data.mid_items);
-        updateItemsList('lateItems', data.late_items);
-    }
-
-    function updateItemsList(listId, items) {
-        const list = document.getElementById(listId);
-        list.innerHTML = '';
-        
-        items.forEach(item => {
-            const li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center';
-            
-            const img = document.createElement('img');
-            img.src = `/static/images/items/${item.toLowerCase().replace(' ', '_').replace('\'', '')}.png`;
-            img.alt = item;
-            img.style.width = '32px';
-            img.style.height = '32px';
-            img.style.marginRight = '10px';
-            
-            img.onerror = function() {
-                console.log('PNG failed, trying JPG...');
-                this.src = `/static/images/items/${item.toLowerCase().replace(' ', '_').replace('\'', '')}.jpg`;
-                this.onerror = null; // Предотвращаем бесконечный цикл
-            };
-            
-            li.appendChild(img);
-            li.appendChild(document.createTextNode(item));
-            list.appendChild(li);
-        });
-    }
-</script>
-
 <style>
-.build-section {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-}
+    .card {
+        border-radius: 10px;
+    }
 
-.hero-section {
-    text-align: center;
-    margin-bottom: 30px;
-}
+    .card-header {
+        font-weight: bold;
+        text-transform: uppercase;
+    }
 
-.hero-image {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+    .item-card {
+        margin: 5px;
+    }
 
-.items-section h5 {
-    margin-top: 20px;
-    color: #495057;
-}
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
 
-.item-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    padding: 0;
-    list-style: none;
-}
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
 
-.item-card {
-    background-color: white;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 120px;
-}
-
-.item-image {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    margin-bottom: 8px;
-}
-
-.item-name {
-    font-size: 0.9em;
-    text-align: center;
-    word-wrap: break-word;
-}
-
-.list-unstyled li {
-    margin: 5px 0;
-    padding: 5px 10px;
-    background-color: white;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+    .text-primary {
+        color: #007bff !important;
+    }
 </style>
-{% endblock %} 
+
+<script>
+    document.getElementById('generateBtn').addEventListener('click', function () {
+        const slug = window.location.pathname.split('/')[2]; // Извлекаем slug из URL
+        fetch(`/game/${slug}/generate/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('buildResult').style.display = 'block';
+
+                // Обновляем героя
+                const heroImage = document.getElementById('heroImage');
+                const heroName = document.getElementById('heroName');
+                heroImage.src = data.hero_image_png || data.hero_image;
+                heroName.textContent = data.hero;
+
+                // Обновляем Starting Items
+                const startingItems = document.getElementById('startingItems');
+                startingItems.innerHTML = ''; // Очищаем предыдущие результаты
+                data.starting_items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'item-card me-2';
+                    li.innerHTML = `
+                        <div class="card text-center shadow-sm" style="width: 80px;">
+                            <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="max-height: 50px;">
+                            <div class="card-body p-1">
+                                <small class="card-title">${item.name}</small>
+                            </div>
+                        </div>
+                    `;
+                    startingItems.appendChild(li);
+                });
+
+                // Аналогично обновляем Early, Mid и Late Game Items
+                const updateItems = (items, containerId) => {
+                    const container = document.getElementById(containerId);
+                    container.innerHTML = '';
+                    items.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'item-card me-2';
+                        li.innerHTML = `
+                            <div class="card text-center shadow-sm" style="width: 80px;">
+                                <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="max-height: 50px;">
+                                <div class="card-body p-1">
+                                    <small class="card-title">${item.name}</small>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(li);
+                    });
+                };
+
+                updateItems(data.early_game, 'earlyItems');
+                updateItems(data.mid_game, 'midItems');
+                updateItems(data.late_game, 'lateItems');
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
+{% endblock %}
