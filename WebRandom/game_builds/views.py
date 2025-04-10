@@ -19,7 +19,8 @@ def game_list(request):
 
 def game_detail(request, slug):
     game = get_object_or_404(Game, slug=slug)
-    name = game.name.lower()
+    name = game.name.lower().strip()
+    print("Game name:", name)  # для отладки
     if name == "dota 2":
         template = "game_builds/game_detail_dota2.html"
     elif name == "dead by daylight":

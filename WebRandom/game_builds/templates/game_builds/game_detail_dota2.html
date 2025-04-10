@@ -15,7 +15,7 @@
                 <h3>Hero</h3>
             </div>
             <div class="card-body text-center">
-                <img id="heroImage" src="" alt="Hero" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+                <img id="heroImage" src="" alt="Hero" class="img-fluid mb-3" style="max-width: 150px;">
                 <h4 id="heroName" class="text-primary fw-bold"></h4>
             </div>
         </div>
@@ -23,7 +23,18 @@
         <ul id="startingItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
         <ul id="earlyItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
         <ul id="midItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
-        <ul id="lateItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
+        <ul id="lateItems" class="list-unstyled d-flex flex-wrap justify-content-center">
+            {% for item in build.late_items %}
+                <li class="item-card me-2 text-center">
+                    <div class="card" style="width: 80px;">
+                        <img src="{{ item.image_png }}" alt="{{ item.name }}" class="card-img-top img-fluid" style="max-height: 50px;">
+                        <div class="card-body p-1">
+                            <small class="card-text">{{ item.name }}</small>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 {% endblock %}
@@ -78,11 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
                 
-                // Обновляем разделы для каждого набора предметов
-                updateItems(data.starting_items, 'startingItems');
-                updateItems(data.early_game, 'earlyItems');
-                updateItems(data.mid_game, 'midItems');
-                updateItems(data.late_game, 'lateItems');
+                // Обновляем только раздел для late game предметов
+                updateItems(data.late_items, 'lateItems');
             })
             .catch(error => {
                 console.error('Ошибка:', error);
