@@ -9,8 +9,20 @@ from django.contrib import messages
 
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug')
+    list_display = ('name', 'slug', 'description')
     prepopulated_fields = {'slug': ('name',)}
+    search_fields = ('name', 'slug')
+    actions = ['delete_selected_games']
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+    def delete_selected_games(self, request, queryset):
+        queryset.delete()
+    delete_selected_games.short_description = "Delete selected games"
 
 @admin.register(Build)
 class BuildAdmin(admin.ModelAdmin):

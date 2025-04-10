@@ -1,0 +1,12 @@
+# Code Citations
+
+## License: unknown
+https://github.com/Rayyan06/blog/tree/608087004f589c71f2b505147607a0527b6675f7/templates/games/index.html
+
+```
+="card-body">
+                <h5 class="card-title">{{ game.name }}</h5>
+                <p class="card-text">{{ game.description }}</p>
+                <a href="{
+```
+
