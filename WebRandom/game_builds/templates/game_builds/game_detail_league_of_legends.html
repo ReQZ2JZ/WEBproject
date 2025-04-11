@@ -1,0 +1,59 @@
+{% extends 'game_builds/base.html' %}
+
+{% block content %}
+<div class="container text-center my-5">
+    <h2>🎮 League of Legends: Рандомный билд</h2>
+
+    <button id="generate-btn" class="btn btn-primary my-4">🎲 Сгенерировать билд</button>
+
+    <div id="build-result" class="build-result"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+console.log("🔥 СКРИПТ ПОДКЛЮЧЕН");
+
+const button = document.getElementById("generate-btn");
+
+if (button) {
+    button.addEventListener("click", function () {
+        console.log("🚀 Клик по кнопке");
+
+        fetch(window.location.pathname + "generate/")
+            .then(response => response.json())
+            .then(data => {
+                console.log("📦 Получено:", data);
+
+                if (data.error) {
+                    document.getElementById("build-result").innerHTML =
+                        `<p class="text-danger">${data.error}</p>`;
+                    return;
+                }
+
+                const championHtml = `
+                    <h3>Чемпион: ${data.champion.name}</h3>
+                    <img src="${data.champion.image}" alt="${data.champion.name}" style="height: 150px;" class="mb-4">
+                `;
+
+                const itemsHtml = data.items.map(item => `
+                    <div class="d-inline-block mx-2 text-center">
+                        <img src="${item.image}" alt="${item.name}" style="height: 80px;"><br>
+                        <small>${item.name}</small>
+                    </div>
+                `).join('');
+
+                document.getElementById("build-result").innerHTML =
+                    championHtml + `<h4 class="mt-4">Предметы:</h4>` + itemsHtml;
+            })
+            .catch(error => {
+                console.error("❌ Ошибка:", error);
+                document.getElementById("build-result").innerHTML =
+                    `<p class="text-danger">Ошибка при получении билда.</p>`;
+            });
+    });
+} else {
+    console.error("🚫 Кнопка не найдена!");
+}
+</script>
+{% endblock %}
