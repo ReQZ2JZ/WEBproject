@@ -9,32 +9,33 @@
         .game-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .game-card:hover {
             transform: scale(1.05);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
-
         .card-title {
             font-weight: bold;
             text-transform: uppercase;
         }
-
         .btn-primary {
             background-color: #007bff;
             border: none;
             transition: background-color 0.3s ease;
         }
-
         .btn-primary:hover {
             background-color: #0056b3;
         }
-
         .build-result {
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
+        }
+        .character-image img, .champion-image img {
+            max-width: 100px;
+        }
+        .perk-icon img, .item-image img {
+            max-width: 64px;
         }
     </style>
 </head>
@@ -48,7 +49,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        {% if user.is_authenticated and user.is_staff %}
+                        {% if user.is_staff %}
                             <li class="nav-item">
                                 <a class="nav-link" href="/admin/">Панель администратора</a>
                             </li>
@@ -64,10 +65,135 @@
     </nav>
 
     <div class="container mt-4">
-        {% block content %}{% endblock %}
+        {% block content %}
+        <div class="container mt-5">
+            <h1 class="text-center text-uppercase text-primary mb-4">Доступные игры</h1>
+
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for game in games %}
+                <div class="col">
+                    <div class="card h-100 shadow game-card">
+                        {% if game.image %}
+                        <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.name }}" style="max-height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-uppercase">{{ game.name }}</h5>
+                            <p class="card-text text-muted">{{ game.description }}</p>
+                        </div>
+                        <div class="card-footer text-center">
+                            <a href="{% url 'game_builds:game_detail' game.slug %}" class="btn btn-primary w-100">Генерировать билд</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        Пока нет доступных игр. Скоро добавим!
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endblock %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_scripts %}{% endblock %}
+    {% block extra_scripts %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateBtn = document.getElementById('generateBtn');
+        if (!generateBtn) return;
+
+        generateBtn.addEventListener('click', function () {
+            let parts = window.location.pathname.split('/');
+            let slug = parts[2];
+            if (!slug) return;
+
+            fetch(`/game/${slug}/generate/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Сгенерированный билд:", data);
+                    const buildBox = document.getElementById('buildResult');
+                    if (!buildBox) return;
+                    buildBox.style.display = 'block';
+
+                    const heroImage = document.getElementById('heroImage') || document.getElementById('characterImage');
+                    const heroName = document.getElementById('heroName') || document.getElementById('characterName');
+
+                    if (slug === 'league-of-legends') {
+                        if(heroImage && heroName) {
+                            heroImage.src = data.champion?.image || "";
+                            heroName.textContent = data.champion?.name || "";
+                        }
+                        data.items.forEach((item, index) => {
+                            const imgEl = document.getElementById(`item${index+1}Img`);
+                            const nameEl = document.getElementById(`item${index+1}Name`);
+                            if (imgEl) imgEl.src = item.image;
+                            if (nameEl) nameEl.textContent = item.name;
+                        });
+                    } else if (slug === 'dead-by-daylight') {
+                        if(heroImage && heroName) {
+                            heroImage.src = data.character_image_png;
+                            heroName.textContent = data.character;
+                        }
+                        const perksList = document.getElementById('perksList');
+                        if (perksList) {
+                            perksList.innerHTML = '';
+                            data.perks.forEach(perk => {
+                                const li = document.createElement('li');
+                                li.textContent = perk.name || perk;
+                                perksList.appendChild(li);
+                            });
+                        }
+                        const itemCard = document.getElementById('itemCard');
+                        const itemName = document.getElementById('itemName');
+                        const itemImage = document.getElementById('itemImage');
+                        const addonsCard = document.getElementById('addonsCard');
+                        const addonsList = document.getElementById('addonsList');
+
+                        if (data.item_name && data.item_image_png) {
+                            itemCard.style.display = 'block';
+                            itemName.textContent = data.item_name;
+                            itemImage.src = data.item_image_png;
+
+                            if (data.addons && data.addons.length > 0) {
+                                addonsCard.style.display = 'block';
+                                addonsList.innerHTML = '';
+                                data.addons.forEach(addon => {
+                                    const li = document.createElement('li');
+                                    li.textContent = addon;
+                                    li.className = 'text-info fw-bold';
+                                    addonsList.appendChild(li);
+                                });
+                            } else {
+                                addonsCard.style.display = 'none';
+                            }
+                        } else {
+                            itemCard.style.display = 'none';
+                            addonsCard.style.display = 'none';
+                        }
+                    } else if (slug === 'dota-2') {
+                        if(heroImage && heroName) {
+                            heroImage.src = data.hero_image_png;
+                            heroName.textContent = data.hero;
+                        }
+                        if (Array.isArray(data.items)) {
+                            data.items.forEach((item, index) => {
+                                const imgEl = document.getElementById(`item${index+1}Img`);
+                                const nameEl = document.getElementById(`item${index+1}Name`);
+                                if (imgEl) imgEl.src = item.image;
+                                if (nameEl) nameEl.textContent = item.name;
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert("Ошибка при генерации билда. Проверьте консоль для деталей.");
+                });
+        });
+    });
+    </script>
+    {% endblock %}
 </body>
 </html>
