@@ -26,7 +26,7 @@ class Build(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='builds')
     name = models.CharField(max_length=200)
     description = models.TextField()
-    components = models.JSONField()  # Будет хранить компоненты билда в JSON формате
+    components = models.JSONField()  # Хранит данные о сборке (например, автомобиль)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

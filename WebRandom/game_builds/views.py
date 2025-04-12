@@ -9,9 +9,9 @@ import random
 from django.contrib.auth import logout
 from django.views.decorators.http import require_http_methods
 from .games.dota2 import generate_dota2_build
-from .games.world_of_tanks import generate_world_of_tanks_build
-from .games.league_of_legends import generate_league_of_legends_build
 from .games.clash_royale import generate_clash_royale_build
+from .games.forza_horizon5 import generate_forza_horizon5_build
+from .games.league_of_legends import generate_league_of_legends_build
 
 def game_list(request):
     games = Game.objects.all()
@@ -20,32 +20,40 @@ def game_list(request):
 def game_detail(request, slug):
     game = get_object_or_404(Game, slug=slug)
     name = game.name.lower().strip()
-    print("Game name:", name)  # для отладки
+
     if name == "dota 2":
         template = "game_builds/game_detail_dota2.html"
     elif name == "clash royale":
         template = "game_builds/game_detail_clash_royale.html"
-    elif name == "мир танков":
-        template = "game_builds/game_detail_worldoftanks.html"
+    elif name == "forza horizon 5":
+        template = "game_builds/game_detail_forza_horizon5.html"
     elif name == "league of legends":
         template = "game_builds/game_detail_league_of_legends.html"
     else:
         template = "game_builds/game_detail.html"
+
     return render(request, template, {'game': game})
 
 def generate_random_build(request, slug):
     game = get_object_or_404(Game, slug=slug)
 
-    if game.name.lower() == "dota 2":
+    if game.name.lower() == "forza horizon 5":
+        car_class = request.GET.get("class")  # Получаем класс из параметров запроса
+        build = generate_forza_horizon5_build(car_class)
+        return render(request, 'game_builds/game_detail_forza_horizon5.html', {
+            'game': game,
+            'build': build,
+            'car_class': car_class,
+        })
+    elif game.name.lower() == "dota 2":
         build = generate_dota2_build()
     elif game.name.lower() == "clash royale":
         build = generate_clash_royale_build()
-    elif game.name.lower() == "мир танков":
-        build = generate_world_of_tanks_build()
     elif game.name.lower() == "league of legends":
         build = generate_league_of_legends_build()
     else:
         build = {"error": "Build generation not implemented for this game"}
+        return JsonResponse(build)
 
     return JsonResponse(build)
 
