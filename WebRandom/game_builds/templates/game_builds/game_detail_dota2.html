@@ -1,207 +1,303 @@
 {% extends 'game_builds/base.html' %}
-{% block title %}{{ game.name }} – Random Build Generator{% endblock %}
+{% block title %}{{ game.name }} – Генератор случайных билдов{% endblock %}
 
 {% block content %}
-<div class="container my-5 px-4" style="max-width: 1200px; font-family: 'Segoe UI', sans-serif; color: #fff;">
-<style>
-    body {
-        background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
-        color: #fff;
-        overflow-x: hidden;
-    }
-
-    .neon-title {
-        font-size: 3.5rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        text-shadow: 0 0 25px cyan, 0 0 40px cyan;
-    }
-
-    .btn-glass, .btn-outline-light {
-        background: rgba(255,255,255,0.1);
-        border: 2px solid #00f7ff;
-        border-radius: 1rem;
-        padding: 12px 26px;
-        font-size: 1.1rem;
-        font-family: 'Bangers', sans-serif;
-        transition: all 0.3s ease-in-out;
-        box-shadow: 0 0 10px #00f7ff44;
-    }
-
-    .btn-glass:hover {
-        background: rgba(0,255,255,0.2);
-        transform: translateY(-3px);
-        box-shadow: 0 0 15px #00f7ff, 0 0 40px #00f7ff;
-    }
-
-    .glass {
-        background: rgba(255,255,255,0.1);
-        border-radius: 1.5rem;
-        backdrop-filter: blur(15px);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
-        animation: fadeInUp 0.5s ease;
-    }
-
-    .item-card {
-        background: rgba(0,0,0,0.25);
-        border: 2px solid #00f7ff;
-        backdrop-filter: blur(6px);
-        border-radius: 1rem;
-        padding: 20px;
-        margin: 15px;
-        transition: all 0.3s ease;
-        text-align: center;
-    }
-
-    .item-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px #00f7ff, 0 0 35px #00f7ff;
-    }
-
-    .loader {
-        border: 6px solid rgba(255, 255, 255, 0.2);
-        border-top: 6px solid #00f7ff;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
-        display: none;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg);}
-        100% { transform: rotate(360deg);}
-    }
-
-    .role-filter {
-        color: #fff;
-        font-weight: 600;
-    }
-</style>
-
-<div class="text-center mb-5">
-    <h1 class="neon-title">Dota 2 Build Generator</h1>
-    <p class="lead opacity-75">Generate the perfect build, tailored for your role</p>
-    
-    <div class="d-flex justify-content-center gap-3 mb-4">
-        <select id="roleSelect" class="form-select w-auto bg-dark text-white border-info">
-            <option value="">All Roles</option>
-            <option value="carry">Carry</option>
-            <option value="support">Support</option>
-            <option value="offlane">Offlane</option>
-        </select>
-        <button id="generateBtn" class="btn btn-glass">🎲 Generate Build</button>
-        <button id="resetBtn" class="btn btn-outline-light">♻️ Reset</button>
-    </div>
-
-    <div class="loader" id="loader"></div>
-</div>
-
-<div id="buildResult" class="glass p-4 mt-5" style="display: none;">
-    <div class="text-center mb-4">
-        <img id="heroImage" class="hero-image img-fluid" src="" alt="Hero" style="max-height: 200px;">
-        <h2 id="heroName" class="mt-3 text-glow"></h2>
-        <p id="heroDescription" class="text-muted">Master of time, keeper of secrets.</p>
-    </div>
-
-    <div class="row mt-4 justify-content-center">
-        <div class="col-12 text-center mb-3">
-            <h4 class="text-glow">⚔️ Late Game Items</h4>
-        </div>
-        <div id="lateItems" class="d-flex flex-wrap gap-4 justify-content-center"></div>
-    </div>
-
-    <div class="text-center mt-5">
-        <button id="downloadBtn" class="btn btn-outline-light border-glow px-4 py-2">⬇️ Download Build</button>
-    </div>
-</div>
-
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const generateBtn = document.getElementById('generateBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const loader = document.getElementById('loader');
-        const resultBlock = document.getElementById('buildResult');
-        const heroImage = document.getElementById('heroImage');
-        const heroName = document.getElementById('heroName');
-        const lateItems = document.getElementById('lateItems');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const roleSelect = document.getElementById('roleSelect');
-
-        const showLoader = () => loader.style.display = 'block';
-        const hideLoader = () => loader.style.display = 'none';
-
-        const loadBuild = (role = '') => {
-            showLoader();
-            resultBlock.style.display = 'none';
-
-            const slug = window.location.pathname.split('/')[2];
-            const url = `/game/${slug}/generate/${role ? '?role=' + role : ''}`;
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    hideLoader();
-                    resultBlock.style.display = 'block';
-                    heroImage.src = data.hero_image_png;
-                    heroName.textContent = data.hero;
-                    lateItems.innerHTML = '';
-
-                    data.late_items.forEach(item => {
-                        const card = document.createElement('div');
-                        card.className = 'item-card';
-                        card.innerHTML = `
-                            <img src="${item.image_png}" alt="${item.name}" class="mb-2">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-description">${item.description || 'No description available'}</div>
-                        `;
-                        lateItems.appendChild(card);
-                    });
-
-                    localStorage.setItem('lastBuild', JSON.stringify(data));
-                });
-        };
-
-        generateBtn.addEventListener('click', () => {
-            loadBuild(roleSelect.value);
-        });
-
-        downloadBtn.addEventListener('click', () => {
-            html2canvas(document.querySelector("#buildResult")).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'dota2_build.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        });
-
-        resetBtn.addEventListener('click', () => {
-            resultBlock.style.display = 'none';
-            localStorage.removeItem('lastBuild');
-        });
-
-        // Автозагрузка последнего билда
-        const saved = localStorage.getItem('lastBuild');
-        if (saved) {
-            const data = JSON.parse(saved);
-            heroImage.src = data.hero_image_png;
-            heroName.textContent = data.hero;
-            lateItems.innerHTML = '';
-            data.late_items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                card.innerHTML = `
-                    <img src="${item.image_png}" alt="${item.name}" class="mb-2">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-description">${item.description || 'No description available'}</div>
-                `;
-                lateItems.appendChild(card);
-            });
-            resultBlock.style.display = 'block';
+<div class="container my-5 px-4" style="max-width: 1400px; font-family: 'Orbitron', sans-serif; color: #fff; position: relative; z-index: 1;">
+    <!-- СТИЛИ -->
+    <style>
+        body {
+            margin: 0;
+            background: #0a0a0a;
+            overflow-x: hidden;
+            position: relative;
         }
-    });
-</script>
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #1e1e2f, #0d1b2a, #2a2a4a, #1b263b);
+            background-size: 400%;
+            animation: gradient 15s ease infinite;
+            z-index: -1;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .neon-title {
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+            background: linear-gradient(90deg, #00f7ff, #ff00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(255, 0, 255, 0.6);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .btn-glass {
+            background: linear-gradient(145deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-glass:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), 0 0 50px rgba(255, 0, 255, 0.6);
+            background: linear-gradient(145deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+        }
+        .btn-outline-light {
+            background: transparent;
+            border: 2px solid #00f7ff;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.4s ease;
+        }
+        .btn-outline-light:hover {
+            background: #00f7ff;
+            color: #0a0a0a;
+            box-shadow: 0 0 20px #00f7ff;
+        }
+        .glass {
+            background: rgba(10, 10, 10, 0.5);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), 0 0 60px rgba(255, 0, 255, 0.2);
+            padding: 30px;
+            animation: fadeIn 1s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .item-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px;
+            transition: all 0.4s ease;
+            text-align: center;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        .item-card:hover {
+            transform: rotateY(10deg) rotateX(10deg) scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), 0 0 50px rgba(255, 0, 255, 0.6);
+        }
+        .item-card img {
+            max-width: 100px;
+            transition: transform 0.3s ease;
+        }
+        .item-card:hover img {
+            transform: scale(1.2);
+        }
+        .item-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00f7ff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+        .item-description {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: none;
+            position: relative;
+            margin: 0 auto;
+            display: none;
+        }
+        .loader::before, .loader::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #00f7ff;
+            opacity: 0.6;
+            animation: pulseLoader 2s infinite ease-in-out;
+        }
+        .loader::after {
+            animation-delay: -1s;
+        }
+        @keyframes pulseLoader {
+            0% { transform: scale(0.5); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.2; }
+            100% { transform: scale(0.5); opacity: 0.6; }
+        }
+    </style>
+
+    <!-- Анимации и заголовки -->
+    <div class="background"></div>
+    <div id="particles"></div>
+
+    <div class="text-center mb-5">
+        <h1 class="neon-title">Генератор билдов Dota 2</h1>
+        <p class="lead" style="color: #ccc; font-size: 1.3rem;">Создай эпичный билд для своей игры!</p>
+
+        <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
+            <button class="btn btn-glass role-btn" data-role="">Сгенерировать билд</button>
+            <button id="resetBtn" class="btn btn-outline-light">♻️ Сбросить</button>
+            <a href="/" class="btn btn-outline-light">🏠 Вернуться домой</a> <!-- ✅ Кнопка домой -->
+        </div>
+
+        <div class="loader" id="loader"></div>
+    </div>
+
+    <!-- Результаты -->
+    <div id="buildResult" class="glass p-4 mt-5" style="display: none;">
+        <div class="text-center mb-4">
+            <img id="heroImage" class="hero-image img-fluid" src="" alt="Герой" style="max-height: 250px; border-radius: 15px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
+            <h2 id="heroName" class="mt-3" style="font-size: 2rem; color: #00f7ff; text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);"></h2>
+            <p id="heroDescription" style="color: #ccc;">Мастер времени, хранитель тайн.</p>
+        </div>
+        <div class="row mt-4 justify-content-center">
+            <div class="col-12 text-center mb-3">
+                <h4 style="font-size: 1.8rem; color: #ff00ff; text-shadow: 0 0 15px rgba(255, 0, 255, 0.8);">⚔️ Предметы для поздней игры</h4>
+            </div>
+            <div id="lateItems" class="d-flex flex-wrap gap-4 justify-content-center"></div>
+        </div>
+        <div class="text-center mt-5">
+            <button id="downloadBtn" class="btn btn-glass border-glow px-5 py-3">⬇️ Скачать билд</button>
+        </div>
+    </div>
+
+    <!-- Частицы и JS -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        particlesJS('particles', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00f7ff', '#ff00ff'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#00f7ff', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: true }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { grab: { distance: 200, line_linked: { opacity: 0.5 } }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateButton = document.querySelector('.role-btn');
+            const resetBtn = document.getElementById('resetBtn');
+            const loader = document.getElementById('loader');
+            const resultBlock = document.getElementById('buildResult');
+            const heroImage = document.getElementById('heroImage');
+            const heroName = document.getElementById('heroName');
+            const lateItems = document.getElementById('lateItems');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            const showLoader = () => loader.style.display = 'block';
+            const hideLoader = () => loader.style.display = 'none';
+
+            const loadBuild = () => {
+                showLoader();
+                resultBlock.style.display = 'none';
+
+                const slug = window.location.pathname.split('/')[2];
+                fetch(`/game/${slug}/generate/`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP ошибка: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        hideLoader();
+                        resultBlock.style.display = 'block';
+                        heroImage.src = data.hero_image_png;
+                        heroName.textContent = data.hero;
+                        lateItems.innerHTML = '';
+
+                        data.late_items.forEach(item => {
+                            const card = document.createElement('div');
+                            card.className = 'item-card';
+                            card.innerHTML = `
+                                <img src="${item.image_png}" alt="${item.name}" class="mb-2">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-description">${item.description || 'Нет описания'}</div>
+                            `;
+                            lateItems.appendChild(card);
+                        });
+
+                        localStorage.setItem('lastBuild', JSON.stringify(data));
+                    })
+                    .catch(error => {
+                        console.error('Ошибка загрузки билда:', error);
+                        hideLoader();
+                    });
+            };
+
+            generateButton.addEventListener('click', loadBuild);
+
+            downloadBtn.addEventListener('click', () => {
+                html2canvas(document.querySelector("#buildResult")).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'dota2_build.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            });
+
+            resetBtn.addEventListener('click', () => {
+                resultBlock.style.display = 'none';
+                localStorage.removeItem('lastBuild');
+            });
+
+            const saved = localStorage.getItem('lastBuild');
+            if (saved) {
+                const data = JSON.parse(saved);
+                heroImage.src = data.hero_image_png;
+                heroName.textContent = data.hero;
+                lateItems.innerHTML = '';
+                data.late_items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.innerHTML = `
+                        <img src="${item.image_png}" alt="${item.name}" class="mb-2">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-description">${item.description || 'Нет описания'}</div>
+                    `;
+                    lateItems.appendChild(card);
+                });
+                resultBlock.style.display = 'block';
+            }
+        });
+    </script>
 </div>
 {% endblock %}
