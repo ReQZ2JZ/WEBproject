@@ -1,4 +1,5 @@
 {% extends 'game_builds/base.html' %}
+<<<<<<< Updated upstream
 {% block title %}{{ game.name }} – Random Build Generator{% endblock %}
 
 {% block content %}
@@ -114,11 +115,67 @@
 
     <div class="text-center mt-5">
         <button id="downloadBtn" class="btn btn-outline-light border-glow px-4 py-2">⬇️ Download Build</button>
+=======
+
+{% block title %}{{ game.name }} - Dota 2 Build{% endblock %}
+
+{% block content %}
+<div class="dota2-container" style="background: linear-gradient(to bottom, #0f0f0f, #1a1a1a); color: #fff; padding: 20px; min-height: 100vh;">
+    <!-- Логотип -->
+    <div class="text-center mb-4">
+        <img src="/static/images/dota2_logo.png" alt="Dota 2 Logo" style="max-width: 300px;">
+    </div>
+
+    <!-- Кнопка генерации -->
+    <div class="text-center mb-4">
+        <button id="generateBtn" class="btn btn-lg btn-danger shadow" style="font-weight: bold; text-transform: uppercase; padding: 15px 30px; font-size: 1.2rem;">Generate Build</button>
+    </div>
+
+    <!-- Результат билда -->
+    <div id="buildResult" style="display: none;">
+        <!-- Карточка героя -->
+        <div class="card mb-4 shadow" style="background: rgba(0,0,0,0.85); border: 1px solid #ff4500; border-radius: 10px;">
+            <div class="card-header text-white text-center" style="font-size: 1.5rem; text-transform: uppercase; background: rgba(255,69,0,0.8);">
+                Hero Build
+            </div>
+            <div class="card-body text-center">
+                <img id="heroImage" src="" alt="Hero" style="max-width: 200px; border: 2px solid #fff; border-radius: 5px;">
+                <h4 id="heroName" class="text-warning fw-bold" style="margin-top: 20px; font-size: 2rem;">hero</h4>
+            </div>
+        </div>
+
+        <!-- Секция Late Game Items -->
+        <div class="late-items-section" style="position: relative; background: url('/static/images/your_late_items_image.png') no-repeat center center; background-size: contain; height: 300px; border: 1px solid #ff4500; border-radius: 10px; margin-bottom: 20px;">
+            <!-- Верхний ряд -->
+            <div id="lateItemsUpper" style="position: absolute; top: 0; left: 0; width: 100%; height: 50%; display: flex; justify-content: center; align-items: flex-end;">
+                <!-- Здесь будут добавлены элементы -->
+            </div>
+            <!-- Нижний ряд -->
+            <div id="lateItemsLower" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; display: flex; justify-content: center; align-items: flex-start;">
+                <!-- Здесь будут добавлены элементы -->
+            </div>
+        </div>
+
+        <!-- Секция статистики -->
+        <div id="heroStats" class="card mb-4 shadow" style="background: rgba(0,0,0,0.85); border: 1px solid #ff4500; border-radius: 10px; display: none;">
+            <div class="card-body d-flex align-items-center">
+                <img id="heroStatsImage" src="" alt="Hero" style="width: 150px; height:150px; object-fit: cover; border-radius: 5px; border: 2px solid #fff;">
+                <div class="ms-4 text-white">
+                    <h4 id="heroStatsName" class="mb-3">Hero Name</h4>
+                    <p id="heroAttack" class="mb-1">Attack: </p>
+                    <p id="heroDefense" class="mb-1">Defense: </p>
+                    <p id="heroMobility" class="mb-1">Mobility: </p>
+                    <p id="heroIntelligence" class="mb-1">Intelligence: </p>
+                </div>
+            </div>
+        </div>
+>>>>>>> Stashed changes
     </div>
 </div>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
+<<<<<<< Updated upstream
     document.addEventListener('DOMContentLoaded', () => {
         const generateBtn = document.getElementById('generateBtn');
         const resetBtn = document.getElementById('resetBtn');
@@ -174,6 +231,88 @@
                 link.download = 'dota2_build.png';
                 link.href = canvas.toDataURL();
                 link.click();
+=======
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generateBtn');
+    if (!generateBtn) {
+        console.error("Кнопка 'Generate Build' не найдена");
+        return;
+    }
+
+    generateBtn.addEventListener('click', function () {
+        let parts = window.location.pathname.split('/');
+        let slug = parts[2];
+        fetch(`/game/${slug}/generate/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok. Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Сгенерированный билд:", data);
+                document.getElementById('buildResult').style.display = 'block';
+
+                // Обновляем героя
+                const heroImage = document.getElementById('heroImage');
+                const heroName = document.getElementById('heroName');
+                if (heroImage && heroName) {
+                    heroImage.src = data.hero_image_png || data.hero_image || "/static/images/heroes/default.png";
+                    heroName.textContent = data.hero;
+                }
+
+                // Обновляем Late Game Items
+                function updateLateItems(items) {
+                    const upperContainer = document.getElementById('lateItemsUpper');
+                    const lowerContainer = document.getElementById('lateItemsLower');
+                    if (!upperContainer || !lowerContainer) {
+                        console.error("Контейнеры для lateItems не найдены");
+                        return;
+                    }
+                    upperContainer.innerHTML = '';
+                    lowerContainer.innerHTML = '';
+
+                    items.slice(0, 3).forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'item-card me-2 text-center';
+                        li.innerHTML = `
+                            <div class="card" style="width: 100px; background: rgba(255,255,255,0.1);">
+                                <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="width:100px; height:100px; object-fit: contain; border-radius: 0;">
+                            </div>
+                        `;
+                        upperContainer.appendChild(li);
+                    });
+
+                    items.slice(3, 6).forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'item-card me-2 text-center';
+                        li.innerHTML = `
+                            <div class="card" style="width: 100px; background: rgba(255,255,255,0.1);">
+                                <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="width:100px; height:100px; object-fit: contain; border-radius: 0;">
+                            </div>
+                        `;
+                        lowerContainer.appendChild(li);
+                    });
+                }
+
+                updateLateItems(data.late_items);
+
+                // Обновляем статистику
+                if (data.stats) {
+                    const heroStatsCard = document.getElementById('heroStats');
+                    document.getElementById('heroStatsImage').src = data.hero_image_png || data.hero_image || "/static/images/heroes/default.png";
+                    document.getElementById('heroStatsName').textContent = data.hero;
+                    document.getElementById('heroAttack').textContent = "Attack: " + data.stats.attack;
+                    document.getElementById('heroDefense').textContent = "Defense: " + data.stats.defense;
+                    document.getElementById('heroMobility').textContent = "Mobility: " + data.stats.mobility;
+                    document.getElementById('heroIntelligence').textContent = "Intelligence: " + data.stats.intelligence;
+                    heroStatsCard.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("Ошибка при генерации билда. Проверьте консоль для деталей.");
+>>>>>>> Stashed changes
             });
         });
 
