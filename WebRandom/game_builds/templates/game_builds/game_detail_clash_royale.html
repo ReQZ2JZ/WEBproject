@@ -1,0 +1,101 @@
+{% extends 'game_builds/base.html' %}
+
+{% block title %}Clash Royale - Random Deck{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center text-uppercase text-primary">Clash Royale - Random Deck</h1>
+    <div class="text-center mb-4">
+        <button id="generateBtn" class="btn btn-lg btn-primary shadow">Generate Random Deck</button>
+    </div>
+    <div id="buildResult" style="display: none;">
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            <!-- Карты будут добавляться сюда -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const generateBtn = document.getElementById('generateBtn');
+        const buildResult = document.getElementById('buildResult');
+
+        generateBtn.addEventListener('click', function () {
+            fetch('/game/clash-royale/generate/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Generated deck:', data);
+
+                    const deckContainer = buildResult.querySelector('.row');
+                    deckContainer.innerHTML = ''; // Очищаем предыдущую колоду
+
+                    data.deck.forEach(card => {
+                        // Определяем цвет текста в зависимости от редкости
+                        let rarityClass = '';
+                        switch (card.rarity) {
+                            case 'Common':
+                                rarityClass = 'text-info'; // Голубенький
+                                break;
+                            case 'Rare':
+                                rarityClass = 'text-warning'; // Желто-оранжевый
+                                break;
+                            case 'Epic':
+                                rarityClass = 'text-purple'; // Яркий фиолетовый
+                                break;
+                            case 'Legendary':
+                                rarityClass = 'text-rainbow'; // Переливающийся RGB
+                                break;
+                            case 'Champion':
+                                rarityClass = 'text-gold'; // Золотой
+                                break;
+                        }
+
+                        const cardHtml = `
+                            <div class="col">
+                                <div class="card h-100 shadow">
+                                    <img src="${card.image}" class="card-img-top" alt="${card.name}">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">${card.name}</h5>
+                                        <p class="card-text ${rarityClass}">
+                                            ${card.rarity}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        deckContainer.insertAdjacentHTML('beforeend', cardHtml);
+                    });
+
+                    buildResult.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error generating deck:', error);
+                    alert('Failed to generate deck. Check the console for details.');
+                });
+        });
+    });
+</script>
+
+<style>
+    .text-purple {
+        color: #8a2be2; /* Яркий фиолетовый */
+    }
+    .text-rainbow {
+        background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+    }
+    .text-gold {
+        color: #ffd700; /* Золотой */
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

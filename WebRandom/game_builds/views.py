@@ -9,9 +9,9 @@ import random
 from django.contrib.auth import logout
 from django.views.decorators.http import require_http_methods
 from .games.dota2 import generate_dota2_build
-from .games.dead_by_daylight import generate_dead_by_daylight_build
 from .games.world_of_tanks import generate_world_of_tanks_build
 from .games.league_of_legends import generate_league_of_legends_build
+from .games.clash_royale import generate_clash_royale_build
 
 def game_list(request):
     games = Game.objects.all()
@@ -23,8 +23,8 @@ def game_detail(request, slug):
     print("Game name:", name)  # для отладки
     if name == "dota 2":
         template = "game_builds/game_detail_dota2.html"
-    elif name == "dead by daylight":
-        template = "game_builds/game_detail_dead_by_daylight.html"
+    elif name == "clash royale":
+        template = "game_builds/game_detail_clash_royale.html"
     elif name == "мир танков":
         template = "game_builds/game_detail_worldoftanks.html"
     elif name == "league of legends":
@@ -38,8 +38,8 @@ def generate_random_build(request, slug):
 
     if game.name.lower() == "dota 2":
         build = generate_dota2_build()
-    elif game.name.lower() == "dead by daylight":
-        build = generate_dead_by_daylight_build()
+    elif game.name.lower() == "clash royale":
+        build = generate_clash_royale_build()
     elif game.name.lower() == "мир танков":
         build = generate_world_of_tanks_build()
     elif game.name.lower() == "league of legends":
