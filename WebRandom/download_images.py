@@ -1,194 +1,63 @@
-import os
 import requests
-import time
+from bs4 import BeautifulSoup
+import os
+import urllib.request
 
-def download_image(url, filepath):
-    if os.path.exists(filepath):
-        print(f"Skipped: {filepath} already exists")
-        return True
-    try:
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            with open(filepath, 'wb') as f:
-                f.write(response.content)
-            print(f"Downloaded: {filepath}")
-            return True
-        else:
-            print(f"Error downloading {url}: Status {response.status_code}")
-    except Exception as e:
-        print(f"Error downloading {url}: {e}")
-    return False
+# Укажи папку для сохранения изображений (абсолютный путь с учётом пробела)
+output_dir = r"C:\Users\Пин Код\Documents\GitHub\WEBproject\WebRandom\static\images\forza_horizon5\cars"
 
-def create_directories():
-    os.makedirs('static/images/heroes', exist_ok=True)
-    os.makedirs('static/images/items', exist_ok=True)
+# Создаём папку, если она не существует (включая промежуточные директории)
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
-def download_hero_images():
-    # Список героев из твоего dota2.py
-    heroes = [
-        "Anti-Mage", "Faceless Void", "Juggernaut", "Terrorblade", "Spectre",
-        "Phantom Assassin", "Riki", "Drow Ranger", "Medusa", "Morphling",
-        "Luna", "Slark", "Sniper", "Ursa", "Troll Warlord", "Naga Siren",
-        "Monkey King", "Chaos Knight", "Lifestealer", "Wraith King",
-        "Shadow Fiend", "Templar Assassin", "Invoker", "Storm Spirit", "Queen of Pain",
-        "Puck", "Tinker", "Ember Spirit", "Zeus", "Outworld Destroyer", "Huskar",
-        "Death Prophet", "Leshrac", "Lina", "Dragon Knight", "Batrider", "Arc Warden",
-        "Void Spirit", "Axe", "Mars", "Timbersaw", "Centaur Warrunner", "Underlord",
-        "Doom", "Bristleback", "Slardar", "Tidehunter", "Night Stalker", "Sand King",
-        "Beastmaster", "Pangolier", "Dark Seer", "Magnus", "Broodmother",
-        "Primal Beast", "Abaddon", "Clockwerk", "Treant Protector", "Crystal Maiden",
-        "Lich", "Witch Doctor", "Warlock", "Jakiro", "Disruptor", "Bane",
-        "Shadow Shaman", "Lion", "Dazzle", "Omniknight", "Oracle", "Io",
-        "Grimstroke", "Rubick", "Dark Willow", "Enchantress", "Chen", "Silencer",
-        "Techies", "Keeper of the Light", "Ancient Apparition", "Skywrath Mage",
-        "Shadow Demon", "Vengeful Spirit", "Snapfire", "Marci", "Tusk",
-        "Earthshaker", "Earth Spirit", "Phoenix", "Bounty Hunter", "Pudge",
-        "Nyx Assassin", "Meepo", "Mirana", "Clinkz", "Hoodwink", "Weaver",
-        "Spirit Breaker", "Venomancer", "Nature's Prophet", "Enigma", "Visage",
-        "Necrophos", "Alchemist", "Viper"
-    ]
+# URL страницы со списком автомобилей (forza.net/cars)
+url = "https://forza.net/cars"  # Укажи точный URL, если он отличается
 
-    # Получаем данные героев из API OpenDota
-    response = requests.get("https://api.opendota.com/api/heroes")
-    if response.status_code != 200:
-        print(f"Failed to fetch heroes: {response.status_code}")
-        return
-    api_heroes = response.json()
-    hero_dict = {hero['localized_name']: hero for hero in api_heroes}
+# Заголовки для имитации браузера
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
 
-    for hero in heroes:
-        hero_name = hero.lower().replace(' ', '_').replace("'", "")
-        filepath = f"static/images/heroes/{hero_name}.png"
-        hero_data = hero_dict.get(hero)
+try:
+    # Отправляем запрос на сайт
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()  # Проверяем, что запрос успешен
 
-        if not hero_data or 'img' not in hero_data or not hero_data['img']:
-            print(f"Warning: No image for {hero}, trying Wiki")
-            wiki_hero_name = hero.replace(' ', '_')
-            wiki_url = f"https://static.wikia.nocookie.net/dota2_gamepedia/images/{wiki_hero_name[0].lower()}/{wiki_hero_name}_icon.png"
-            if not download_image(wiki_url, filepath):
-                placeholder_url = "https://via.placeholder.com/150"  # Новая заглушка
-                download_image(placeholder_url, filepath)
-            continue
+    # Парсим HTML
+    soup = BeautifulSoup(response.text, "html.parser")
 
-        img_url = "https://api.opendota.com" + hero_data['img']
-        if not download_image(img_url, filepath):
-            wiki_hero_name = hero.replace(' ', '_')
-            wiki_url = f"https://static.wikia.nocookie.net/dota2_gamepedia/images/{wiki_hero_name[0].lower()}/{wiki_hero_name}_icon.png"
-            if not download_image(wiki_url, filepath):
-                placeholder_url = "https://via.placeholder.com/150"  # Новая заглушка
-                download_image(placeholder_url, filepath)
-        time.sleep(0.2)
+    # Ищем все теги <img> (адаптируй селектор под сайт)
+    img_tags = soup.find_all("img", class_="car-image")  # Укажи правильный класс
 
-def download_item_images():
-    # Список предметов из твоего dota2.py
-    items = [
-        "Abyssal Blade", "Assault Cuirass", "Battle Fury", "Black King Bar", "Bloodthorn",
-        "Butterfly", "Daedalus", "Desolator", "Divine Rapier", "Eye of Skadi", "Heart of Tarrasque",
-        "Linken's Sphere", "Manta Style", "Monkey King Bar", "Nullifier", "Octarine Core",
-        "Radiance", "Refresher Orb", "Satanic", "Scythe of Vyse", "Shiva's Guard",
-        "Skull Basher", "Sphere", "Travel Boots", "Vladmir's Offering"
-    ]
+    if not img_tags:
+        print("Не удалось найти изображения. Проверь селектор или структуру сайта.")
+    else:
+        print(f"Найдено {len(img_tags)} изображений.")
 
-    # Получаем данные предметов из API OpenDota
-    response = requests.get("https://api.opendota.com/api/constants/items")
-    if response.status_code != 200:
-        print(f"Failed to fetch items: {response.status_code}")
-        return
-    api_items = response.json()
-
-    # Маппинг для OpenDota
-    item_mapping_opendota = {
-        "Abyssal Blade": "abyssal_blade",
-        "Assault Cuirass": "assault_cuirass",
-        "Battle Fury": "bfury",
-        "Black King Bar": "black_king_bar",
-        "Bloodthorn": "bloodthorn",
-        "Butterfly": "butterfly",
-        "Daedalus": "daedalus",
-        "Desolator": "desolator",
-        "Divine Rapier": "rapier",
-        "Eye of Skadi": "skadi",
-        "Heart of Tarrasque": "heart",
-        "Linken's Sphere": "linkens_sphere",
-        "Manta Style": "manta_style",
-        "Monkey King Bar": "monkey_king_bar",
-        "Nullifier": "nullifier",
-        "Octarine Core": "octarine_core",
-        "Radiance": "radiance",
-        "Refresher Orb": "refresher",
-        "Satanic": "satanic",
-        "Scythe of Vyse": "sheepstick",
-        "Shiva's Guard": "shivas_guard",
-        "Skull Basher": "basher",
-        "Sphere": "linkens_sphere",
-        "Travel Boots": "travel_boots",
-        "Vladmir's Offering": "vladmirs_offering"  # Уже исправлено
-    }
-
-    # Маппинг для Steam CDN
-    item_mapping_steam = {
-        "Abyssal Blade": "abyssal_blade",
-        "Assault Cuirass": "assault_cuirass",
-        "Battle Fury": "bfury",
-        "Black King Bar": "black_king_bar",
-        "Bloodthorn": "bloodthorn",
-        "Butterfly": "butterfly",
-        "Daedalus": "daedalus",
-        "Desolator": "desolator",
-        "Divine Rapier": "rapier",
-        "Eye of Skadi": "skadi",
-        "Heart of Tarrasque": "heart",
-        "Linken's Sphere": "linken_s_sphere",
-        "Manta Style": "manta",
-        "Monkey King Bar": "monkey_king_bar",
-        "Nullifier": "nullifier",
-        "Octarine Core": "octarine_core",
-        "Radiance": "radiance",
-        "Refresher Orb": "refresher",
-        "Satanic": "satanic",
-        "Scythe of Vyse": "sheepstick",
-        "Shiva's Guard": "shivas_guard",
-        "Skull Basher": "basher",
-        "Sphere": "linken_s_sphere",
-        "Travel Boots": "travel_boots",
-        "Vladmir's Offering": "vladmir"
-    }
-
-    for item in items:
-        # Имя для сохранения файла
-        item_filename = item.lower().replace(' ', '_').replace("'", "")
-        filepath = f"static/images/items/{item_filename}.png"
-
-        # 1. Пробуем OpenDota
-        item_key = item_mapping_opendota.get(item, item.lower().replace(' ', '_').replace("'", ""))
-        found_item = None
-        for key, item_data in api_items.items():
-            if item_data.get('dname', '').lower().replace(' ', '_') == item_key:
-                found_item = item_data
-                break
-
-        if found_item and 'img' in found_item and found_item['img']:
-            img_url = "https://api.opendota.com" + found_item['img']
-            if download_image(img_url, filepath):
+        # Скачиваем каждое изображение
+        for idx, img in enumerate(img_tags):
+            img_url = img.get("src")
+            if not img_url:
                 continue
 
-        # 2. Пробуем Steam CDN
-        print(f"Warning: No image for {item} on OpenDota, trying Steam CDN")
-        steam_item_name = item_mapping_steam.get(item, item.lower().replace(' ', '_').replace("'", ""))
-        steam_url = f"https://cdn.dota2.com/apps/dota2/images/items/{steam_item_name}_lg.png"
-        if download_image(steam_url, filepath):
-            continue
+            # Если URL относительный, добавляем базовый домен
+            if not img_url.startswith("http"):
+                img_url = "https://forza.net" + img_url
 
-        # 3. Заглушка
-        print(f"Warning: No image for {item} on Steam CDN, using placeholder")
-        placeholder_url = "https://via.placeholder.com/150"  # Новая заглушка
-        download_image(placeholder_url, filepath)
-        time.sleep(0.2)
+            # Имя файла
+            car_name = img.get("alt", f"car_{idx}").replace(" ", "_").replace("/", "_")
+            file_extension = img_url.split(".")[-1]
+            file_name = f"{car_name}.{file_extension}"
+            file_path = os.path.join(output_dir, file_name)
 
-if __name__ == "__main__":
-    create_directories()
-    print("Downloading hero images...")
-    download_hero_images()
-    print("Downloading item images...")
-    download_item_images()
-    print("Done!")
+            try:
+                print(f"Скачиваем {img_url} как {file_name}...")
+                urllib.request.urlretrieve(img_url, file_path)
+                print(f"Сохранено: {os.path.abspath(file_path)}")
+            except Exception as e:
+                print(f"Ошибка при скачивании {img_url}: {e}")
+
+except requests.exceptions.RequestException as e:
+    print(f"Ошибка при запросе к сайту: {e}")
+
+print("Скачивание завершено!")

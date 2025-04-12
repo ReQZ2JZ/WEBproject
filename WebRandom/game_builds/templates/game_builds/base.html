@@ -6,69 +6,140 @@
     <title>{% block title %}Список игр - Random Builds{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Общий стиль страницы */
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Навигация */
+        .navbar {
+            background: #1e1e1e !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand, .nav-link {
+            color: #ffffff !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #ff3e3e !important;
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Заголовок */
+        .game-list-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 40px;
+            letter-spacing: -0.02em;
+            background: linear-gradient(45deg, #ff3e3e, #ff8e53);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Карточка игры */
         .game-card {
+            background: #1e1e1e;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
         .game-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
         }
-        .card-title {
-            font-weight: bold;
+
+        .game-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .game-card .card-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .game-card .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
             text-transform: uppercase;
         }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        .btn-primary {
-=======
+
+        .game-card .card-text {
+            color: #b0b0b0;
+            font-size: 1rem;
+        }
+
+        .game-card .card-footer {
+            background: #2a2a2a;
+            border-top: none;
+            padding: 15px;
+            text-align: center;
+        }
 
         .btn-custom {
->>>>>>> Stashed changes
-=======
-
-        .btn-custom {
->>>>>>> Stashed changes
-            background-color: #007bff;
+            background: linear-gradient(45deg, #ff3e3e, #ff8e53);
+            color: #fff;
             border: none;
-            transition: background-color 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        .btn-primary:hover {
-=======
 
         .btn-custom:hover {
->>>>>>> Stashed changes
-=======
-
-        .btn-custom:hover {
->>>>>>> Stashed changes
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 62, 62, 0.3);
         }
-        .build-result {
-            background-color: #f8f9fa;
+
+        /* Сообщение об отсутствии игр */
+        .alert-info {
+            background: #2a2a2a;
+            color: #b0b0b0;
+            border: none;
+            border-radius: 8px;
             padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
+            text-align: center;
         }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        .character-image img, .champion-image img {
-            max-width: 100px;
-        }
-        .perk-icon img, .item-image img {
-            max-width: 64px;
-=======
-=======
->>>>>>> Stashed changes
 
-        .item-card {
-            list-style: none;
-            margin: 10px;
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .game-list-title { font-size: 2rem; }
+            .game-card img { height: 150px; }
+            .game-card .card-title { font-size: 1.3rem; }
+        }
+
+        @media (max-width: 480px) {
+            .game-list-title { font-size: 1.8rem; }
+            .btn-custom { width: 100%; }
         }
     </style>
 </head>
@@ -100,31 +171,40 @@
     <div class="container mt-4">
         {% block content %}
         <div class="container mt-5">
-            <h1 class="text-center text-uppercase text-primary mb-4">Доступные игры</h1>
+            <h1 class="game-list-title">Доступные игры</h1>
 
             <div class="row row-cols-1 row-cols-md-3 g-4">
+                <!-- Существующие игры -->
                 {% for game in games %}
                 <div class="col">
                     <div class="card h-100 shadow game-card">
                         {% if game.image %}
-                        <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.name }}" style="max-height: 200px; object-fit: cover;">
+                        <img src="{{ game.image.url }}" class="card-img-top" alt="{{ game.name }}">
                         {% endif %}
                         <div class="card-body">
-                            <h5 class="card-title text-center text-uppercase">{{ game.name }}</h5>
-                            <p class="card-text text-muted">{{ game.description }}</p>
+                            <h5 class="card-title">{{ game.name }}</h5>
+                            <p class="card-text">{{ game.description }}</p>
                         </div>
-                        <div class="card-footer text-center">
+                        <div class="card-footer">
                             <a href="{% url 'game_builds:game_detail' game.slug %}" class="btn btn-custom w-100">Генерировать билд</a>
                         </div>
                     </div>
                 </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        Пока нет доступных игр. Скоро добавим!
+                {% endfor %}
+
+                <!-- Добавляем Forza Horizon 5 -->
+                <div class="col">
+                    <div class="card h-100 shadow game-card">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/8/8f/Forza_Horizon_5_cover_art.jpg" class="card-img-top" alt="Forza Horizon 5">
+                        <div class="card-body">
+                            <h5 class="card-title">Forza Horizon 5</h5>
+                            <p class="card-text">Гоночная игра с открытым миром, где вы можете генерировать случайные автомобили и настройки для захватывающих заездов!</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'game_builds:game_detail' 'forza-horizon-5' %}" class="btn btn-custom w-100">Генерировать билд</a>
+                        </div>
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
         {% endblock %}
@@ -218,6 +298,9 @@
                                 if (nameEl) nameEl.textContent = item.name;
                             });
                         }
+                    } else if (slug === 'forza-horizon-5') {
+                        // Логика для Forza Horizon 5 уже реализована в вашем предыдущем шаблоне
+                        console.log("Forza Horizon 5 build:", data);
                     }
                 })
                 .catch(error => {
