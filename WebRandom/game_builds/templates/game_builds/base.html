@@ -17,12 +17,22 @@
             font-weight: bold;
             text-transform: uppercase;
         }
+<<<<<<< Updated upstream
         .btn-primary {
+=======
+
+        .btn-custom {
+>>>>>>> Stashed changes
             background-color: #007bff;
             border: none;
             transition: background-color 0.3s ease;
         }
+<<<<<<< Updated upstream
         .btn-primary:hover {
+=======
+
+        .btn-custom:hover {
+>>>>>>> Stashed changes
             background-color: #0056b3;
         }
         .build-result {
@@ -31,11 +41,18 @@
             border-radius: 10px;
             margin-top: 20px;
         }
+<<<<<<< Updated upstream
         .character-image img, .champion-image img {
             max-width: 100px;
         }
         .perk-icon img, .item-image img {
             max-width: 64px;
+=======
+
+        .item-card {
+            list-style: none;
+            margin: 10px;
+>>>>>>> Stashed changes
         }
     </style>
 </head>
@@ -46,8 +63,8 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         {% if user.is_staff %}
                             <li class="nav-item">
@@ -81,7 +98,7 @@
                             <p class="card-text text-muted">{{ game.description }}</p>
                         </div>
                         <div class="card-footer text-center">
-                            <a href="{% url 'game_builds:game_detail' game.slug %}" class="btn btn-primary w-100">Генерировать билд</a>
+                            <a href="{% url 'game_builds:game_detail' game.slug %}" class="btn btn-custom w-100">Генерировать билд</a>
                         </div>
                     </div>
                 </div>

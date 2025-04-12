@@ -1,102 +1,207 @@
 {% extends 'game_builds/base.html' %}
-
-{% block title %}{{ game.name }} - Random Build (Dota 2){% endblock %}
+{% block title %}{{ game.name }} – Random Build Generator{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4 text-center text-uppercase text-primary">{{ game.name }}</h1>
-    <div class="text-center mb-4">
-        <button id="generateBtn" class="btn btn-lg btn-primary shadow">Generate Random Build</button>
+<div class="container my-5 px-4" style="max-width: 1200px; font-family: 'Segoe UI', sans-serif; color: #fff;">
+<style>
+    body {
+        background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+        color: #fff;
+        overflow-x: hidden;
+    }
+
+    .neon-title {
+        font-size: 3.5rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-shadow: 0 0 25px cyan, 0 0 40px cyan;
+    }
+
+    .btn-glass, .btn-outline-light {
+        background: rgba(255,255,255,0.1);
+        border: 2px solid #00f7ff;
+        border-radius: 1rem;
+        padding: 12px 26px;
+        font-size: 1.1rem;
+        font-family: 'Bangers', sans-serif;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 0 10px #00f7ff44;
+    }
+
+    .btn-glass:hover {
+        background: rgba(0,255,255,0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 0 15px #00f7ff, 0 0 40px #00f7ff;
+    }
+
+    .glass {
+        background: rgba(255,255,255,0.1);
+        border-radius: 1.5rem;
+        backdrop-filter: blur(15px);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .item-card {
+        background: rgba(0,0,0,0.25);
+        border: 2px solid #00f7ff;
+        backdrop-filter: blur(6px);
+        border-radius: 1rem;
+        padding: 20px;
+        margin: 15px;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .item-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #00f7ff, 0 0 35px #00f7ff;
+    }
+
+    .loader {
+        border: 6px solid rgba(255, 255, 255, 0.2);
+        border-top: 6px solid #00f7ff;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+        display: none;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+    }
+
+    .role-filter {
+        color: #fff;
+        font-weight: 600;
+    }
+</style>
+
+<div class="text-center mb-5">
+    <h1 class="neon-title">Dota 2 Build Generator</h1>
+    <p class="lead opacity-75">Generate the perfect build, tailored for your role</p>
+    
+    <div class="d-flex justify-content-center gap-3 mb-4">
+        <select id="roleSelect" class="form-select w-auto bg-dark text-white border-info">
+            <option value="">All Roles</option>
+            <option value="carry">Carry</option>
+            <option value="support">Support</option>
+            <option value="offlane">Offlane</option>
+        </select>
+        <button id="generateBtn" class="btn btn-glass">🎲 Generate Build</button>
+        <button id="resetBtn" class="btn btn-outline-light">♻️ Reset</button>
     </div>
-    <div id="buildResult" style="display: none;">
-        <!-- Здесь будет вывод результата билда -->
-        <div class="card mb-4 shadow">
-            <div class="card-header bg-primary text-white text-center">
-                <h3>Hero</h3>
-            </div>
-            <div class="card-body text-center">
-                <img id="heroImage" src="" alt="Hero" class="img-fluid mb-3" style="max-width: 150px;">
-                <h4 id="heroName" class="text-primary fw-bold"></h4>
-            </div>
+
+    <div class="loader" id="loader"></div>
+</div>
+
+<div id="buildResult" class="glass p-4 mt-5" style="display: none;">
+    <div class="text-center mb-4">
+        <img id="heroImage" class="hero-image img-fluid" src="" alt="Hero" style="max-height: 200px;">
+        <h2 id="heroName" class="mt-3 text-glow"></h2>
+        <p id="heroDescription" class="text-muted">Master of time, keeper of secrets.</p>
+    </div>
+
+    <div class="row mt-4 justify-content-center">
+        <div class="col-12 text-center mb-3">
+            <h4 class="text-glow">⚔️ Late Game Items</h4>
         </div>
-        <!-- Секции для предметов -->
-        <ul id="startingItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
-        <ul id="earlyItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
-        <ul id="midItems" class="list-unstyled d-flex flex-wrap justify-content-center"></ul>
-        <ul id="lateItems" class="list-unstyled d-flex flex-wrap justify-content-center">
-            {% for item in build.late_items %}
-                <li class="item-card me-2 text-center">
-                    <div class="card" style="width: 80px;">
-                        <img src="{{ item.image_png }}" alt="{{ item.name }}" class="card-img-top img-fluid" style="max-height: 50px;">
-                        <div class="card-body p-1">
-                            <small class="card-text">{{ item.name }}</small>
-                        </div>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
+        <div id="lateItems" class="d-flex flex-wrap gap-4 justify-content-center"></div>
+    </div>
+
+    <div class="text-center mt-5">
+        <button id="downloadBtn" class="btn btn-outline-light border-glow px-4 py-2">⬇️ Download Build</button>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const generateBtn = document.getElementById('generateBtn');
-    if (!generateBtn) {
-        console.error("Кнопка 'Generate Random Build' не найдена");
-        return;
-    }
-    
-    generateBtn.addEventListener('click', function () {
-        let parts = window.location.pathname.split('/');
-        let slug = parts[2]; 
-        fetch(`/game/${slug}/generate/`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok. Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Сгенерированный билд:", data);
-                document.getElementById('buildResult').style.display = 'block';
-                
-                // Обновляем героя
-                const heroImage = document.getElementById('heroImage');
-                const heroName = document.getElementById('heroName');
-                if (heroImage && heroName) {
-                    heroImage.src = data.hero_image_png || data.hero_image || "/static/images/heroes/default.png";
+    document.addEventListener('DOMContentLoaded', () => {
+        const generateBtn = document.getElementById('generateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const loader = document.getElementById('loader');
+        const resultBlock = document.getElementById('buildResult');
+        const heroImage = document.getElementById('heroImage');
+        const heroName = document.getElementById('heroName');
+        const lateItems = document.getElementById('lateItems');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const roleSelect = document.getElementById('roleSelect');
+
+        const showLoader = () => loader.style.display = 'block';
+        const hideLoader = () => loader.style.display = 'none';
+
+        const loadBuild = (role = '') => {
+            showLoader();
+            resultBlock.style.display = 'none';
+
+            const slug = window.location.pathname.split('/')[2];
+            const url = `/game/${slug}/generate/${role ? '?role=' + role : ''}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    hideLoader();
+                    resultBlock.style.display = 'block';
+                    heroImage.src = data.hero_image_png;
                     heroName.textContent = data.hero;
-                }
-                
-                // Функция для обновления списка предметов
-                function updateItems(items, containerId) {
-                    const container = document.getElementById(containerId);
-                    container.innerHTML = '';
-                    items.forEach(item => {
-                        const li = document.createElement('li');
-                        li.className = 'item-card me-2 text-center';
-                        li.innerHTML = `
-                            <div class="card" style="width: 80px;">
-                                <img src="${item.image_png}" alt="${item.name}" class="card-img-top img-fluid" style="max-height: 50px;">
-                                <div class="card-body p-1">
-                                    <small class="card-text">${item.name}</small>
-                                </div>
-                            </div>
+                    lateItems.innerHTML = '';
+
+                    data.late_items.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'item-card';
+                        card.innerHTML = `
+                            <img src="${item.image_png}" alt="${item.name}" class="mb-2">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-description">${item.description || 'No description available'}</div>
                         `;
-                        container.appendChild(li);
+                        lateItems.appendChild(card);
                     });
-                }
-                
-                // Обновляем только раздел для late game предметов
-                updateItems(data.late_items, 'lateItems');
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert("Ошибка при генерации билда. Проверьте консоль для деталей.");
+
+                    localStorage.setItem('lastBuild', JSON.stringify(data));
+                });
+        };
+
+        generateBtn.addEventListener('click', () => {
+            loadBuild(roleSelect.value);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            html2canvas(document.querySelector("#buildResult")).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'dota2_build.png';
+                link.href = canvas.toDataURL();
+                link.click();
             });
+        });
+
+        resetBtn.addEventListener('click', () => {
+            resultBlock.style.display = 'none';
+            localStorage.removeItem('lastBuild');
+        });
+
+        // Автозагрузка последнего билда
+        const saved = localStorage.getItem('lastBuild');
+        if (saved) {
+            const data = JSON.parse(saved);
+            heroImage.src = data.hero_image_png;
+            heroName.textContent = data.hero;
+            lateItems.innerHTML = '';
+            data.late_items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <img src="${item.image_png}" alt="${item.name}" class="mb-2">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-description">${item.description || 'No description available'}</div>
+                `;
+                lateItems.appendChild(card);
+            });
+            resultBlock.style.display = 'block';
+        }
     });
-});
 </script>
+</div>
 {% endblock %}
