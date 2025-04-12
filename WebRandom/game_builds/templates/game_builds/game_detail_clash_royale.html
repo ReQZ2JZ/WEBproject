@@ -37,7 +37,6 @@
                     deckContainer.innerHTML = ''; // Очищаем предыдущую колоду
 
                     data.deck.forEach(card => {
-                        // Определяем цвет текста в зависимости от редкости
                         let rarityClass = '';
                         switch (card.rarity) {
                             case 'Common':
@@ -85,7 +84,8 @@
 
 <style>
     .text-purple {
-        color: #8a2be2; /* Яркий фиолетовый */
+        color: #8a2be2 !important; /* Яркий фиолетовый */
+        font-weight: bold;
     }
     .text-rainbow {
         background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
@@ -94,7 +94,7 @@
         font-weight: bold;
     }
     .text-gold {
-        color: #ffd700; /* Золотой */
+        color: #ffd700 !important; /* Золотой */
         font-weight: bold;
     }
 </style>
