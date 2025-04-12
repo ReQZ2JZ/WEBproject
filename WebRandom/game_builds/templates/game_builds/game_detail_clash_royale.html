@@ -3,14 +3,13 @@
 {% block title %}Clash Royale - Random Deck{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4 text-center text-uppercase text-primary">Clash Royale - Random Deck</h1>
-    <div class="text-center mb-4">
-        <button id="generateBtn" class="btn btn-lg btn-primary shadow">Generate Random Deck</button>
+<div class="container mt-5">
+    <h1 class="mb-5 text-center text-uppercase text-primary display-4">Clash Royale - Random Deck</h1>
+    <div class="text-center mb-5">
+        <button id="generateBtn" class="btn btn-lg btn-gradient shadow">Generate Random Deck</button>
     </div>
     <div id="buildResult" style="display: none;">
         <div class="row row-cols-1 row-cols-md-4 g-4">
-            <!-- Карты будут добавляться сюда -->
         </div>
     </div>
 </div>
@@ -25,46 +24,32 @@
         generateBtn.addEventListener('click', function () {
             fetch('/game/clash-royale/generate/')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Generated deck:', data);
-
                     const deckContainer = buildResult.querySelector('.row');
-                    deckContainer.innerHTML = ''; // Очищаем предыдущую колоду
+                    deckContainer.innerHTML = '';
 
                     data.deck.forEach(card => {
                         let rarityClass = '';
                         switch (card.rarity) {
-                            case 'Common':
-                                rarityClass = 'text-info'; // Голубенький
-                                break;
-                            case 'Rare':
-                                rarityClass = 'text-warning'; // Желто-оранжевый
-                                break;
-                            case 'Epic':
-                                rarityClass = 'text-purple'; // Яркий фиолетовый
-                                break;
-                            case 'Legendary':
-                                rarityClass = 'text-rainbow'; // Переливающийся RGB
-                                break;
-                            case 'Champion':
-                                rarityClass = 'text-gold'; // Золотой
-                                break;
+                            case 'Common': rarityClass = 'text-info'; break;
+                            case 'Rare': rarityClass = 'text-warning'; break;
+                            case 'Epic': rarityClass = 'text-purple'; break;
+                            case 'Legendary': rarityClass = 'text-rainbow'; break;
+                            case 'Champion': rarityClass = 'text-gold'; break;
                         }
 
                         const cardHtml = `
                             <div class="col">
-                                <div class="card h-100 shadow">
-                                    <img src="${card.image}" class="card-img-top" alt="${card.name}">
+                                <div class="card h-100 shadow-lg fade-in">
+                                    <div class="card-image-container">
+                                        <img src="${card.image}" class="card-img-top" alt="${card.name}">
+                                    </div>
                                     <div class="card-body text-center">
                                         <h5 class="card-title">${card.name}</h5>
-                                        <p class="card-text ${rarityClass}">
-                                            ${card.rarity}
-                                        </p>
+                                        <p class="card-text ${rarityClass}">${card.rarity}</p>
                                     </div>
                                 </div>
                             </div>
@@ -83,19 +68,127 @@
 </script>
 
 <style>
+    body {
+        background: url("/static/images/ClashRoyale/Bg/bg.png") no-repeat center center fixed;
+        background-size: cover;
+        color: #e0e0e0;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    h1 {
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px #000;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        color: #fff;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        animation: fade-in-up 0.6s ease-in-out;
+    }
+
+    .btn-gradient:hover {
+        background: linear-gradient(90deg, #feb47b, #ff7e5f);
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(255, 126, 95, 0.5);
+    }
+
+    .card {
+        overflow: hidden;
+        border-radius: 15px;
+        background: #2a2a3bcc;
+        backdrop-filter: blur(5px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .card-image-container {
+        width: 100%;
+        min-height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #1e1e2f;
+    }
+    
+    .card-img-top {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+    }        
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .card-text {
+        font-size: 1rem;
+    }
+
     .text-purple {
-        color: #8a2be2 !important; /* Яркий фиолетовый */
+        color: #8a2be2 !important;
         font-weight: bold;
     }
+
+    .text-gold {
+        color: #ffd700 !important;
+        font-weight: bold;
+    }
+
     .text-rainbow {
-        background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+        font-weight: bold;
+        background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet, red);
+        background-size: 400% 400%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-weight: bold;
+        animation: rainbow-shift 5s ease-in-out infinite;
     }
-    .text-gold {
-        color: #ffd700 !important; /* Золотой */
-        font-weight: bold;
+
+    @keyframes rainbow-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .fade-in {
+        animation: fade-in-up 0.6s ease-in-out;
+    }
+
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card-image-container {
+            aspect-ratio: 3/4;
+        }
+
+        .btn-gradient {
+            font-size: 1rem;
+            padding: 10px 20px;
+        }
     }
 </style>
 {% endblock %}
