@@ -49,6 +49,7 @@ def generate_random_build(request, slug):
         build = generate_dota2_build()
     elif game.name.lower() == "clash royale":
         build = generate_clash_royale_build()
+        return JsonResponse(build) 
     elif game.name.lower() == "league of legends":
         build = generate_league_of_legends_build()
     else:
