@@ -5,51 +5,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Список игр - Random Builds{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Varela+Round&display=swap" rel="stylesheet">
     <style>
         /* Общий стиль страницы */
         body {
-            background: #121212;
-            color: #e0e0e0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(to bottom, #1a0933, #ff0066);
+            color: #ffffff;
+            font-family: 'Varela Round', sans-serif;
             min-height: 100vh;
             margin: 0;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Фоновая сетка */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.2),
+                rgba(0, 0, 0, 0.2) 1px,
+                transparent 1px,
+                transparent 40px
+            ),
+            repeating-linear-gradient(
+                90deg,
+                rgba(0, 0, 0, 0.2),
+                rgba(0, 0, 0, 0.2) 1px,
+                transparent 1px,
+                transparent 40px
+            );
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        /* Эффект CRT */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.03) 50%,
+                rgba(0, 0, 0, 0.05) 50%
+            );
+            background-size: 100% 4px;
+            z-index: 0;
+            pointer-events: none;
+            animation: crtScan 3s linear infinite;
+        }
+
+        @keyframes crtScan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100px; }
         }
 
         /* Навигация */
         .navbar {
-            background: #1e1e1e !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background: rgba(10, 0, 20, 0.95) !important;
+            padding: 15px 0;
+            border-bottom: 3px solid #ff0066;
+            box-shadow: 0 0 15px rgba(255, 0, 102, 0.5);
         }
 
-        .navbar-brand, .nav-link {
+        .navbar-brand {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8rem;
+            color: #ffcc00 !important;
+            text-shadow: 0 0 8px #ffcc00, 0 0 16px #ff0066;
+            transition: transform 0.2s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.1);
+        }
+
+        .nav-link {
+            font-family: 'Press Start 2P', cursive;
             color: #ffffff !important;
-            font-weight: 500;
-            transition: color 0.3s ease;
+            font-size: 1rem;
+            padding: 10px 20px;
+            text-shadow: 0 0 5px #ff0066;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
         }
 
         .nav-link:hover {
-            color: #ff3e3e !important;
+            color: #ffcc00 !important;
+            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ff0066;
         }
 
         /* Карточки */
         .card {
-            background: #1e1e1e;
-            border: none;
-            border-radius: 12px;
+            background: rgba(20, 10, 40, 0.9);
+            border: 2px solid #ffcc00;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: pixelFade 1s ease-out forwards;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.6), 0 0 40px rgba(255, 0, 102, 0.4);
+            border-color: #ff0066;
         }
 
         .card img {
-            height: 200px;
+            height: 230px;
             object-fit: cover;
+            filter: saturate(1.2);
+            transition: filter 0.3s ease;
+        }
+
+        .card:hover img {
+            filter: saturate(1.5) brightness(1.1);
         }
 
         .card .card-body {
@@ -58,41 +137,83 @@
         }
 
         .card .card-title {
+            font-family: 'Press Start 2P', cursive;
             font-size: 1.5rem;
-            font-weight: 700;
-            color: #ffffff;
+            color: #ffcc00;
+            text-shadow: 0 0 6px #ffcc00;
             margin-bottom: 10px;
-            text-transform: uppercase;
         }
 
         .card .card-text {
-            color: #b0b0b0;
+            color: #e0e0e0;
             font-size: 1rem;
+            line-height: 1.6;
         }
 
         .card .card-footer {
-            background: #2a2a2a;
-            border-top: none;
+            background: rgba(10, 0, 20, 0.9);
+            border-top: 2px solid #ff0066;
             padding: 15px;
             text-align: center;
         }
 
+        .btn-custom {
+            font-family: 'Press Start 2P', cursive;
+            background: #ff0066;
+            color: #ffffff;
+            font-size: 0.9rem;
+            border: 2px solid #ffcc00;
+            border-radius: 5px;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 102, 0.5);
+        }
+
+        .btn-custom:hover {
+            background: #ffcc00;
+            color: #1a0933;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
+            transform: translateY(-2px);
+        }
+
         /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes pixelFade {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes flicker {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .card:hover .card-title {
+            animation: flicker 0.2s linear;
+        }
+
+        /* Контейнер */
+        .container {
+            padding-top: 50px;
+            max-width: 1250px;
         }
 
         /* Адаптивность */
         @media (max-width: 768px) {
-            .game-list-title { font-size: 2rem; }
-            .card img { height: 150px; }
+            .game-list-title { font-size: 1.8rem; }
+            .card img { height: 180px; }
             .card .card-title { font-size: 1.3rem; }
+            .navbar-brand { font-size: 1.5rem; }
+            .nav-link { font-size: 0.9rem; padding: 8px 15px; }
         }
 
         @media (max-width: 480px) {
-            .game-list-title { font-size: 1.8rem; }
-            .btn-custom { width: 100%; }
+            .game-list-title { font-size: 1.5rem; }
+            .card img { height: 140px; }
+            .card .card-title { font-size: 1.1rem; }
+            .btn-custom { width: 100%; font-size: 0.8rem; padding: 8px; }
+            .navbar-brand { font-size: 1.3rem; }
         }
     </style>
 </head>

@@ -1,63 +1,66 @@
 import requests
-from bs4 import BeautifulSoup
 import os
-import urllib.request
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
-# Укажи папку для сохранения изображений (абсолютный путь с учётом пробела)
-output_dir = r"C:\Users\Пин Код\Documents\GitHub\WEBproject\WebRandom\static\images\forza_horizon5\cars"
+# Настройки
+BASE_URL = "https://api.hearthstonejson.com/v1/latest/enUS/cards.json"  # JSON со всеми картами (enUS)
+OUTPUT_DIR = "static/images/hearthstone"  # Папка для сохранения изображений
+MAX_WORKERS = 10  # Количество потоков для параллельной загрузки
 
-# Создаём папку, если она не существует (включая промежуточные директории)
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+def create_output_dir(directory):
+    """Создает папку для изображений, если она не существует."""
+    Path(directory).mkdir(parents=True, exist_ok=True)
 
-# URL страницы со списком автомобилей (forza.net/cars)
-url = "https://forza.net/cars"  # Укажи точный URL, если он отличается
+def download_image(card, output_dir):
+    """Скачивает изображение одной карты."""
+    card_id = card.get("id")
+    img_url = card.get("img")  # URL изображения карты
+    if not img_url or not card_id:
+        print(f"Пропущена карта {card.get('name', 'без имени')}: нет URL или ID")
+        return
 
-# Заголовки для имитации браузера
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-}
+    file_name = f"{card_id}.png"
+    file_path = os.path.join(output_dir, file_name)
 
-try:
-    # Отправляем запрос на сайт
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()  # Проверяем, что запрос успешен
+    try:
+        response = requests.get(img_url, stream=True, timeout=10)
+        if response.status_code == 200:
+            with open(file_path, "wb") as f:
+                for chunk in response.iter_content(1024):
+                    f.write(chunk)
+            print(f"Скачана карта: {card.get('name')} ({card_id})")
+        else:
+            print(f"Ошибка загрузки {card_id}: статус {response.status_code}")
+    except requests.RequestException as e:
+        print(f"Ошибка загрузки {card_id}: {e}")
 
-    # Парсим HTML
-    soup = BeautifulSoup(response.text, "html.parser")
+def main():
+    # Создаем папку для изображений
+    create_output_dir(OUTPUT_DIR)
 
-    # Ищем все теги <img> (адаптируй селектор под сайт)
-    img_tags = soup.find_all("img", class_="car-image")  # Укажи правильный класс
+    # Получаем данные о картах
+    print("Загружаем данные о картах...")
+    try:
+        response = requests.get(BASE_URL, timeout=10)
+        response.raise_for_status()
+        cards = response.json()
+    except requests.RequestException as e:
+        print(f"Ошибка загрузки JSON: {e}")
+        return
 
-    if not img_tags:
-        print("Не удалось найти изображения. Проверь селектор или структуру сайта.")
-    else:
-        print(f"Найдено {len(img_tags)} изображений.")
+    # Фильтруем только коллекционные карты (collectible=True)
+    collectible_cards = [card for card in cards if card.get("collectible", False)]
+    print(f"Найдено {len(collectible_cards)} коллекционных карт")
 
-        # Скачиваем каждое изображение
-        for idx, img in enumerate(img_tags):
-            img_url = img.get("src")
-            if not img_url:
-                continue
+    # Скачиваем изображения параллельно
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        executor.map(
+            lambda card: download_image(card, OUTPUT_DIR),
+            collectible_cards
+        )
 
-            # Если URL относительный, добавляем базовый домен
-            if not img_url.startswith("http"):
-                img_url = "https://forza.net" + img_url
+    print("Загрузка завершена!")
 
-            # Имя файла
-            car_name = img.get("alt", f"car_{idx}").replace(" ", "_").replace("/", "_")
-            file_extension = img_url.split(".")[-1]
-            file_name = f"{car_name}.{file_extension}"
-            file_path = os.path.join(output_dir, file_name)
-
-            try:
-                print(f"Скачиваем {img_url} как {file_name}...")
-                urllib.request.urlretrieve(img_url, file_path)
-                print(f"Сохранено: {os.path.abspath(file_path)}")
-            except Exception as e:
-                print(f"Ошибка при скачивании {img_url}: {e}")
-
-except requests.exceptions.RequestException as e:
-    print(f"Ошибка при запросе к сайту: {e}")
-
-print("Скачивание завершено!")
+if __name__ == "__main__":
+    main()
