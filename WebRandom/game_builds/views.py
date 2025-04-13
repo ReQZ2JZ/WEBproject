@@ -42,7 +42,7 @@ def generate_random_build(request, slug):
 
     if game.name.lower() == "hearthstone":
         hero_class = request.GET.get("class")  # Получаем класс героя из параметров запроса
-        build = generate_hearthstone_build(hero_class)
+        build = generate_hearthstone_build(hero_class)  # Генерация случайной деки
         return render(request, 'game_builds/game_detail_hearthstone.html', {
             'game': game,
             'build': build,
@@ -50,16 +50,16 @@ def generate_random_build(request, slug):
         })
     elif game.name.lower() == "dota 2":
         build = generate_dota2_build()
+        return JsonResponse(build)
     elif game.name.lower() == "clash royale":
         build = generate_clash_royale_build()
-        return JsonResponse(build) 
+        return JsonResponse(build)
     elif game.name.lower() == "league of legends":
         build = generate_league_of_legends_build()
-    else:
-        build = {"error": "Build generation not implemented for this game"}
         return JsonResponse(build)
-
-    return JsonResponse(build)
+    else:
+        messages.error(request, "Генерация дек для этой игры не поддерживается.")
+        return redirect('game_builds:game_list')
 
 def is_github_user(user):
     return user.is_authenticated and hasattr(user, 'social_auth') and \
