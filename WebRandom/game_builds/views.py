@@ -1,17 +1,20 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.contrib.auth.decorators import user_passes_test, login_required
-from django.contrib import messages
-from django.utils import timezone
-from .models import Game, Build, AdminInvite
-from .forms import UserRegistrationForm
 import random
+
+from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from .games.dota2 import generate_dota2_build
+
+from .forms import UserRegistrationForm
 from .games.clash_royale import generate_clash_royale_build
-from .games.forza_horizon5 import generate_forza_horizon5_build
+from .games.dota2 import generate_dota2_build
+from .games.hearthstone import generate_hearthstone_build
 from .games.league_of_legends import generate_league_of_legends_build
+from .models import AdminInvite, Build, Game
+
 
 def game_list(request):
     games = Game.objects.all()
@@ -25,8 +28,8 @@ def game_detail(request, slug):
         template = "game_builds/game_detail_dota2.html"
     elif name == "clash royale":
         template = "game_builds/game_detail_clash_royale.html"
-    elif name == "forza horizon 5":
-        template = "game_builds/game_detail_forza_horizon5.html"
+    elif name == "hearthstone":
+        template = "game_builds/game_detail_hearthstone.html"
     elif name == "league of legends":
         template = "game_builds/game_detail_league_of_legends.html"
     else:
@@ -37,13 +40,13 @@ def game_detail(request, slug):
 def generate_random_build(request, slug):
     game = get_object_or_404(Game, slug=slug)
 
-    if game.name.lower() == "forza horizon 5":
-        car_class = request.GET.get("class")  # Получаем класс из параметров запроса
-        build = generate_forza_horizon5_build(car_class)
-        return render(request, 'game_builds/game_detail_forza_horizon5.html', {
+    if game.name.lower() == "hearthstone":
+        hero_class = request.GET.get("class")  # Получаем класс героя из параметров запроса
+        build = generate_hearthstone_build(hero_class)
+        return render(request, 'game_builds/game_detail_hearthstone.html', {
             'game': game,
             'build': build,
-            'car_class': car_class,
+            'hero_class': hero_class,
         })
     elif game.name.lower() == "dota 2":
         build = generate_dota2_build()
