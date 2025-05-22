@@ -67,12 +67,12 @@ def generate_league_of_legends_build():
     return {
     "champion": {
         "name": champion,
-        "image": f"/static/images/League_of_Legends/champion_images/{format_image_name(champion)}"
+        "image": f"/static/images/League_of_Legends/champion_images/{format_image_name(champion)}.png"
     },
     "items": [
         {
             "name": item,
-            "image": f"/static/images/League_of_Legends/item_images/{format_image_name(item)}",
+            "image": f"/static/images/League_of_Legends/item_images/{format_image_name(item)}.png",
             "category": categories[i]
         }
         for i, item in enumerate(items)
