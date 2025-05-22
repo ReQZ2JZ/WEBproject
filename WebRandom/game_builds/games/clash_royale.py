@@ -123,7 +123,15 @@ def generate_clash_royale_build():
         {"name": "Goblin Machine", "image": "/static/images/ClashRoyale/GoblinMachine.png", "rarity": "Legendary"},
     ]
 
-    deck = random.sample(cards, 8)
+    champion_cards = [card for card in cards if card["rarity"] == "Champion"]
+    other_cards = [card for card in cards if card["rarity"] != "Champion"]
+
+    selected_champion = random.sample(champion_cards, 1) if champion_cards and random.choice([True, False]) else []
+
+    remaining_cards_count = 8 - len(selected_champion)
+    remaining_cards = random.sample(other_cards, remaining_cards_count)
+
+    deck = selected_champion + remaining_cards
 
     return {
         "deck": deck
