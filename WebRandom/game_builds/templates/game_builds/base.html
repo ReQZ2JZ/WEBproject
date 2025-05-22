@@ -226,15 +226,9 @@
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        {% if user.is_staff %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="/admin/">Панель администратора</a>
-                            </li>
-                        {% endif %}
-                    {% else %}
+                    {% if user.is_authenticated and user.is_staff %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'game_builds:register' %}">Регистрация</a>
+                            <a class="nav-link" href="/admin/">Панель администратора</a>
                         </li>
                     {% endif %}
                 </ul>
