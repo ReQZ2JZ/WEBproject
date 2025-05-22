@@ -1,6 +1,6 @@
 import random
 
-# Пример карт Hearthstone (✅ пути без /static/)
+# Список карт Hearthstone с путями, начинающимися с /static/
 CARDS = [
     {"name": "Fireball", "class": "Mage", "rarity": "Common", "image": "images/hearthstone/fireball.png"},
     {"name": "Frostbolt", "class": "Mage", "rarity": "Common", "image": "images/hearthstone/frostbolt.png"},
