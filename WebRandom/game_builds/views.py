@@ -41,7 +41,7 @@ def generate_random_build(request, slug):
     game = get_object_or_404(Game, slug=slug)
 
     if game.name.lower() == "hearthstone":
-        hero_class = request.GET.get("class")  # Получаем класс героя из параметров запроса
+        hero_class = request.GET.get("class")  
         build = generate_hearthstone_build(hero_class)
         return render(request, 'game_builds/game_detail_hearthstone.html', {
             'game': game,
@@ -88,7 +88,7 @@ def activate_admin_invite(request, code):
     try:
         invite = AdminInvite.objects.get(code=code, is_used=False)
         github_account = request.user.social_auth.get(provider='github')
-        github_username = github_account.extra_data.get('login')  # Получаем username из GitHub
+        github_username = github_account.extra_data.get('login')  
         
         if invite.github_username == github_username:
             invite.is_used = True

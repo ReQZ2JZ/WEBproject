@@ -150,15 +150,12 @@
     <div class="deck">
       {% for card in build.deck %}
       <div class="card" style="animation-delay: {{ forloop.counter0|add:'0.1'|floatformat:1 }}s;">
-        <!-- Проверка на корректность пути к картинке -->
         <img src="{{ card.image }}" alt="{{ card.name }}">
         <span class="card-name" title="{{ card.name }}">{{ card.name }}</span>
         <div class="rarity {{ card.rarity }}">{{ card.rarity }}</div>
       </div>
       {% endfor %}
     </div>
-
-    <!-- Убираем кнопку для возвращения назад -->
   </div>
 </body>
 </html>
