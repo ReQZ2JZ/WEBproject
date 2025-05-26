@@ -3,7 +3,6 @@
 
 {% block content %}
 <div class="container my-5 px-4" style="max-width: 1400px; font-family: 'Orbitron', sans-serif; color: #fff; position: relative; z-index: 1;">
-    <!-- СТИЛИ -->
     <style>
         body {
             margin: 0;
@@ -157,7 +156,6 @@
         }
     </style>
 
-    <!-- Анимации и заголовки -->
     <div class="background"></div>
     <div id="particles"></div>
 
@@ -168,13 +166,12 @@
         <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
             <button class="btn btn-glass role-btn" data-role="">Сгенерировать билд</button>
             <button id="resetBtn" class="btn btn-outline-light">♻️ Сбросить</button>
-            <a href="/" class="btn btn-outline-light">🏠 Вернуться домой</a> <!-- ✅ Кнопка домой -->
+            <a href="/" class="btn btn-outline-light">🏠 Вернуться домой</a> 
         </div>
 
         <div class="loader" id="loader"></div>
     </div>
 
-    <!-- Результаты -->
     <div id="buildResult" class="glass p-4 mt-5" style="display: none;">
         <div class="text-center mb-4">
             <img id="heroImage" class="hero-image img-fluid" src="" alt="Герой" style="max-height: 250px; border-radius: 15px; box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);">
@@ -191,7 +188,6 @@
         </div>
     </div>
 
-    <!-- Частицы и JS -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>

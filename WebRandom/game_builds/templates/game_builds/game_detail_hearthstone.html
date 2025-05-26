@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <title>Hearthstone Deck Generator</title>
 
-  <!-- Шрифты -->
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Spectral+SC:wght@700&display=swap" rel="stylesheet">
 
   <style>
@@ -176,14 +175,12 @@
 </head>
 <body>
   <div class="container">
-    <!-- Кнопка для возвращения домой -->
     <div style="text-align: left; margin-bottom: 20px;">
       <a href="/" class="home-button">Вернуться домой</a>
     </div>
 
     <h1>Hearthstone</h1>
 
-    <!-- Кнопка для генерации новой колоды -->
     <div class="text-center mt-4">
       <form method="get" action="{% url 'game_builds:generate_random_build' game.slug %}">
         <input type="hidden" name="class" value="{{ hero_class }}">
@@ -191,7 +188,6 @@
       </form>
     </div>
 
-    <!-- Карты -->
     <div class="deck">
       {% for card in build.deck|slice:":10" %}
       <div class="card">
