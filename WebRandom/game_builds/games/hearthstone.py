@@ -1,17 +1,17 @@
 import random
 
-# Пример карт Hearthstone
+# Список карт Hearthstone с путями, начинающимися с /static/
 CARDS = [
-    {"name": "Fireball", "class": "Mage", "rarity": "Common", "image": "/static/images/hearthstone/fireball.png"},
-    {"name": "Frostbolt", "class": "Mage", "rarity": "Common", "image": "/static/images/hearthstone/frostbolt.png"},
-    {"name": "Arcane Intellect", "class": "Mage", "rarity": "Common", "image": "/static/images/hearthstone/arcane_intellect.png"},
-    {"name": "Flamestrike", "class": "Mage", "rarity": "Common", "image": "/static/images/hearthstone/flamestrike.png"},
-    {"name": "Swipe", "class": "Druid", "rarity": "Common", "image": "/static/images/hearthstone/swipe.png"},
-    {"name": "Innervate", "class": "Druid", "rarity": "Rare", "image": "/static/images/hearthstone/innervate.png"},
-    {"name": "Consecration", "class": "Paladin", "rarity": "Common", "image": "/static/images/hearthstone/consecration.png"},
-    {"name": "Equality", "class": "Paladin", "rarity": "Rare", "image": "/static/images/hearthstone/equality.png"},
-    {"name": "Tirion Fordring", "class": "Paladin", "rarity": "Legendary", "image": "/static/images/hearthstone/tirion_fordring.png"},
-    {"name": "Bloodmage Thalnos", "class": "Neutral", "rarity": "Legendary", "image": "/static/images/hearthstone/bloodmage_thalnos.png"},
+    {"name": "Fireball", "class": "Mage", "rarity": "Common", "image": "images/hearthstone/fireball.png"},
+    {"name": "Frostbolt", "class": "Mage", "rarity": "Common", "image": "images/hearthstone/frostbolt.png"},
+    {"name": "Arcane Intellect", "class": "Mage", "rarity": "Common", "image": "images/hearthstone/arcane_intellect.png"},
+    {"name": "Flamestrike", "class": "Mage", "rarity": "Common", "image": "images/hearthstone/flamestrike.png"},
+    {"name": "Swipe", "class": "Druid", "rarity": "Common", "image": "images/hearthstone/swipe.png"},
+    {"name": "Innervate", "class": "Druid", "rarity": "Rare", "image": "images/hearthstone/innervate.png"},
+    {"name": "Consecration", "class": "Paladin", "rarity": "Common", "image": "images/hearthstone/consecration.png"},
+    {"name": "Equality", "class": "Paladin", "rarity": "Rare", "image": "images/hearthstone/equality.png"},
+    {"name": "Tirion Fordring", "class": "Paladin", "rarity": "Legendary", "image": "images/hearthstone/tirion_fordring.png"},
+    {"name": "Bloodmage Thalnos", "class": "Neutral", "rarity": "Legendary", "image": "images/hearthstone/bloodmage_thalnos.png"},
     {"name": "Revival of the forest", "class": "Druid", "rarity": "Epic", "image": "/static/images/hearthstone/Revival_of_the_forest.png"},
     {"name": "Amirdrassil", "class": "Druid", "rarity": "Legendary", "image": "/static/images/hearthstone/Amirdrassil.png"},
     {"name": "Gates of Warp", "class": "Druid", "rarity": "Common", "image": "/static/images/hearthstone/Gates_of_Warp.png"},
@@ -32,7 +32,6 @@ def generate_hearthstone_build(hero_class=None):
     else:
         available_cards = CARDS
 
-    # Генерируем 30 случайных карт
     deck = random.sample(available_cards, min(30, len(available_cards)))
 
     return {

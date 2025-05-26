@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -12,7 +13,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Merriweather', serif;
-      background: url('/static/images/hearthstone/taverna.png') no-repeat center center fixed;
+      background: url('{% static "images/hearthstone/taverna.png" %}') no-repeat center center fixed;
       background-size: cover;
       color: #fff3c0;
       overflow-x: hidden;
@@ -194,10 +195,11 @@
     <div class="deck">
       {% for card in build.deck|slice:":10" %}
       <div class="card">
-        <img src="{{ card.image }}" alt="{{ card.name }}">
+        <img src="{% static card.image %}" alt="{{ card.name }}">
         <span class="card-name" title="{{ card.name }}">{{ card.name }}</span>
         <div class="rarity {{ card.rarity }}">{{ card.rarity }}</div>
       </div>
+      {% empty %}
       {% endfor %}
     </div>
   </div>

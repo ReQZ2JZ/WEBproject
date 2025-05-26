@@ -65,16 +65,17 @@ def generate_league_of_legends_build():
     champion = random.choice(champions)
 
     return {
-        "champion": {
-            "name": champion,
-            "image": f"/media/champion_images/{format_image_name(champion)}"
-        },
-        "items": [
-            {
-                "name": item,
-                "image": f"/media/item_images/{format_image_name(item)}",
-                "category": categories[i]
-            }
-            for i, item in enumerate(items)
-        ]
-    }
+    "champion": {
+        "name": champion,
+        "image": f"/static/images/League_of_Legends/champion_images/{format_image_name(champion)}"
+    },
+    "items": [
+        {
+            "name": item,
+            "image": f"/static/images/League_of_Legends/item_images/{format_image_name(item)}",
+            "category": categories[i]
+        }
+        for i, item in enumerate(items)
+    ]
+}
+
