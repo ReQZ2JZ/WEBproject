@@ -12,14 +12,14 @@ CARDS = [
     {"name": "Equality", "class": "Paladin", "rarity": "Rare", "image": "images/hearthstone/equality.png"},
     {"name": "Tirion Fordring", "class": "Paladin", "rarity": "Legendary", "image": "images/hearthstone/tirion_fordring.png"},
     {"name": "Bloodmage Thalnos", "class": "Neutral", "rarity": "Legendary", "image": "images/hearthstone/bloodmage_thalnos.png"},
-    {"name": "Revival of the forest", "class": "Druid", "rarity": "Epic", "image": "/static/images/hearthstone/Revival_of_the_forest.png"},
-    {"name": "Amirdrassil", "class": "Druid", "rarity": "Legendary", "image": "/static/images/hearthstone/Amirdrassil.png"},
-    {"name": "Gates of Warp", "class": "Druid", "rarity": "Common", "image": "/static/images/hearthstone/Gates_of_Warp.png"},
-    {"name": "Space phenomenon", "class": "Druid", "rarity": "Epic", "image": "/static/images/hearthstone/Space_phenomenon.png"},
-    {"name": "Star Pasture", "class": "Paladin", "rarity": "Rare", "image": "/static/images/hearthstone/Star_Pasture.png"},
-    {"name": "Aircraft carrier", "class": "Druid", "rarity": "Common", "image": "/static/images/hearthstone/Aircraft_carrier.png"},
-    {"name": "Sleeping under the stars", "class": "Paladin", "rarity": "Epic", "image": "/static/images/hearthstone/Sleeping_under_the_stars.png"},
-    {"name": "Forest Lord Cenarius", "class": "Neutral", "rarity": "Legendary", "image": "/static/images/hearthstone/Aircraft_carrier.png"},
+    {"name": "Revival of the forest", "class": "Druid", "rarity": "Epic", "image": "/images/hearthstone/Revival_of_the_forest.png"},
+    {"name": "Amirdrassil", "class": "Druid", "rarity": "Legendary", "image": "/images/hearthstone/Amirdrassil.png"},
+    {"name": "Gates of Warp", "class": "Druid", "rarity": "Common", "image": "/images/hearthstone/Gates_of_Warp.png"},
+    {"name": "Space phenomenon", "class": "Druid", "rarity": "Epic", "image": "/images/hearthstone/Space_phenomenon.png"},
+    {"name": "Star Pasture", "class": "Paladin", "rarity": "Rare", "image": "/images/hearthstone/Star_Pasture.png"},
+    {"name": "Aircraft carrier", "class": "Druid", "rarity": "Common", "image": "/images/hearthstone/Aircraft_carrier.png"},
+    {"name": "Sleeping under the stars", "class": "Paladin", "rarity": "Epic", "image": "/images/hearthstone/Sleeping_under_the_stars.png"},
+    {"name": "Forest Lord Cenarius", "class": "Neutral", "rarity": "Legendary", "image": "/images/hearthstone/Forest_Lord_Cenarius.png"},
 ]
 
 def generate_hearthstone_build(hero_class=None):
